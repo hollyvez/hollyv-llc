@@ -11,11 +11,12 @@ export const Hero = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
+          className="flex justify-center md:justify-end"
         >
           <img
             src="/lovable-uploads/f0eff5c5-547d-42c8-bf0e-a9652045a413.png"
             alt="Professional headshot"
-            className="rounded-full w-64 h-64 object-cover mx-auto md:mx-0"
+            className="rounded-full w-64 h-64 object-cover"
           />
         </motion.div>
         <motion.div
