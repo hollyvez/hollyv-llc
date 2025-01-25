@@ -34,7 +34,7 @@ export const Hero = () => {
           </p>
           <Dialog>
             <DialogTrigger asChild>
-              <button className="inline-block bg-coral text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
+              <button className="inline-block bg-coral text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors mb-16 md:mb-0">
                 Let's Connect
               </button>
             </DialogTrigger>
@@ -95,7 +95,7 @@ export const Hero = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 max-w-2xl mx-auto px-6"
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-2xl mx-auto px-6"
       >
         <blockquote className="text-center">
           <p className="text-xl italic text-gray-300 mb-4">
