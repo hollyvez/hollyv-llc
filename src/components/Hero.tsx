@@ -46,20 +46,20 @@ export const Hero = () => {
                 <div className="space-y-4">
                   <Button variant="outline" className="w-full" asChild>
                     <a 
-                      href="mailto:holly@vezina.co"
+                      href="mailto:hmeibling@gmail.com"
                       className="flex items-center justify-center"
                     >
                       <Mail className="mr-2" />
-                      holly@vezina.co
+                      hmeibling@gmail.com
                     </a>
                   </Button>
                   <Button variant="outline" className="w-full" asChild>
                     <a 
-                      href="tel:+16178350762"
+                      href="tel:+17209349848"
                       className="flex items-center justify-center"
                     >
                       <Phone className="mr-2" />
-                      (617) 835-0762
+                      (720) 934-9848
                     </a>
                   </Button>
                   <Button variant="outline" className="w-full" asChild>
