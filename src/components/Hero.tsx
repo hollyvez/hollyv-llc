@@ -1,4 +1,7 @@
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { LinkedInIcon, Calendar } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -29,12 +32,44 @@ export const Hero = () => {
             As a Product-executive turned founder, I understand the challenges of building
             a company and bringing product capabilities and mindset onto your team.
           </p>
-          <a
-            href="#contact"
-            className="inline-block bg-coral text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
-          >
-            Let's Connect
-          </a>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="inline-block bg-coral text-white px-8 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
+                Let's Connect
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold mb-4">Let's Connect!</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <Button variant="outline" className="w-full" asChild>
+                    <a 
+                      href="https://www.linkedin.com/in/hollymeibling/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
+                      <LinkedInIcon className="mr-2" />
+                      Connect on LinkedIn
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="w-full" asChild>
+                    <a 
+                      href="https://calendar.app.google/LL4bK4VwUvwkJ6B6A" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
+                      <Calendar className="mr-2" />
+                      Schedule a Meeting
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </motion.div>
       </div>
       
