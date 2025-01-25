@@ -5,7 +5,7 @@ import { LinkedinIcon, Calendar, Mail, Phone } from "lucide-react";
 
 export const Hero = () => {
   return (
-    <div className="relative min-h-screen bg-navy text-white flex items-center">
+    <div className="relative min-h-screen bg-navy text-white flex flex-col justify-between">
       <div className="container mx-auto px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -95,9 +95,9 @@ export const Hero = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-2xl mx-auto px-6"
+        className="w-full px-6 pb-8 mt-8 md:mt-0"
       >
-        <blockquote className="text-center">
+        <blockquote className="text-center max-w-2xl mx-auto">
           <p className="text-xl italic text-gray-300 mb-4">
             "Holly helped us to create a focused product strategy that changed the trajectory of our company. And she's also just really great to work with. I can't recommend hiring her enough."
           </p>
