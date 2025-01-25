@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LinkedinIcon, Calendar } from "lucide-react";
+import { LinkedinIcon, Calendar, Mail, Phone } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -44,6 +44,24 @@ export const Hero = () => {
               </DialogHeader>
               <div className="space-y-6">
                 <div className="space-y-4">
+                  <Button variant="outline" className="w-full" asChild>
+                    <a 
+                      href="mailto:holly@vezina.co"
+                      className="flex items-center justify-center"
+                    >
+                      <Mail className="mr-2" />
+                      holly@vezina.co
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="w-full" asChild>
+                    <a 
+                      href="tel:+16178350762"
+                      className="flex items-center justify-center"
+                    >
+                      <Phone className="mr-2" />
+                      (617) 835-0762
+                    </a>
+                  </Button>
                   <Button variant="outline" className="w-full" asChild>
                     <a 
                       href="https://www.linkedin.com/in/hollymeibling/" 
