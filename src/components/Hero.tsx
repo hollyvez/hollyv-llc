@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LinkedInIcon, Calendar } from "lucide-react";
+import { LinkedinIcon, Calendar } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -51,7 +51,7 @@ export const Hero = () => {
                       rel="noopener noreferrer"
                       className="flex items-center justify-center"
                     >
-                      <LinkedInIcon className="mr-2" />
+                      <LinkedinIcon className="mr-2" />
                       Connect on LinkedIn
                     </a>
                   </Button>
