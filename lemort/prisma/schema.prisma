@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+
+  watches Watch[]
+}
+
+model Person {
+  id           String    @id @default(cuid())
+  name         String
+  wikidataId   String    @unique
+  dob          DateTime?
+  photo        String?
+  isPrivate    Boolean   @default(false)
+  gender       String?
+  isDeceased   Boolean   @default(false)
+  diedAt       DateTime?
+  watcherCount Int       @default(0)
+
+  watches Watch[]
+
+  @@index([wikidataId])
+  @@index([isDeceased])
+}
+
+model Watch {
+  id             String    @id @default(cuid())
+  userId         String
+  personId       String
+  paidAt         DateTime  @default(now())
+  stripeChargeId String
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  person        Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@unique([userId, personId])
+  @@index([personId])
+}
+
+model Notification {
+  id      String   @id @default(cuid())
+  watchId String
+  sentAt  DateTime @default(now())
+  channel String   // "sms" | "email"
+
+  watch Watch @relation(fields: [watchId], references: [id], onDelete: Cascade)
+
+  @@index([watchId])
+}
