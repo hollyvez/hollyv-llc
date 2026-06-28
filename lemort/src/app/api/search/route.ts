@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
     const searchRes = await fetch(`${WIKIDATA_API}?${searchParams}`, {
       headers: { "User-Agent": UA },
     });
-    const searchData = await searchRes.json();
+    const searchText = await searchRes.text();
+    console.log(`[search] status=${searchRes.status} body preview: ${searchText.slice(0, 200)}`);
+    const searchData = JSON.parse(searchText);
     const hits: { title: string }[] = searchData.query?.search ?? [];
     const ids = hits.map((h) => h.title); // titles are Q-numbers on Wikidata
 
