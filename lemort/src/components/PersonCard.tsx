@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { MockPerson } from "@/lib/mock-data";
 import { ageQuip, deadQuip, formatDiedAt } from "@/lib/quips";
 import CameoAvatar, { InitialsAvatar } from "./CameoAvatar";
@@ -32,14 +31,14 @@ export default function PersonCard({ person, isFollowing, onFollow }: PersonCard
             filter: isDead ? "grayscale(100%) brightness(0.45)" : undefined,
           }}
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={person.photo}
             alt={person.name}
             width={48}
             height={48}
-            className="object-cover"
+            style={{ width: 48, height: 48, objectFit: "cover" }}
             onError={() => setImgErr(true)}
-            unoptimized
           />
         </div>
       );

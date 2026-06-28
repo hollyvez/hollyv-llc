@@ -1,4 +1,6 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 
 interface CameoAvatarProps {
   gender: "man" | "woman";
@@ -7,56 +9,58 @@ interface CameoAvatarProps {
 }
 
 export default function CameoAvatar({ gender, size = 48, dimmed = false }: CameoAvatarProps) {
+  const [err, setErr] = useState(false);
   const src = gender === "man" ? "/cameo-man.png" : "/cameo-woman.png";
 
   return (
     <div
       style={{
         width: size,
-        height: size * 1.15,
-        position: "relative",
+        height: size,
+        borderRadius: "50%",
+        overflow: "hidden",
         flexShrink: 0,
         filter: dimmed ? "grayscale(100%) brightness(0.45)" : undefined,
       }}
     >
-      {/* Gold oval frame */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: "50%",
-          background: "linear-gradient(145deg, #d4af37, #a8871a, #f0d060, #a8871a)",
-          padding: 3,
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            overflow: "hidden",
-            background: "#e8e0d0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Image
-            src={src}
-            alt={`${gender} cameo silhouette`}
-            fill
-            className="object-cover"
-            unoptimized
-            onError={() => {}}
-          />
-          {/* Fallback SVG silhouette shown via CSS if img fails */}
-        </div>
-      </div>
+      {!err ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={`${gender} cameo`}
+          width={size}
+          height={size}
+          style={{ width: size, height: size, objectFit: "cover" }}
+          onError={() => setErr(true)}
+        />
+      ) : (
+        <FallbackSilhouette gender={gender} size={size} />
+      )}
     </div>
   );
 }
 
-/** Inline initials avatar for famous people without a photo */
+function FallbackSilhouette({ gender, size }: { gender: "man" | "woman"; size: number }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "#e8e0d0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        border: "2px solid #d4af37",
+        fontSize: size * 0.4,
+      }}
+    >
+      {gender === "man" ? "🎩" : "🪞"}
+    </div>
+  );
+}
+
+/** Initials avatar for public figures without a confirmed photo */
 export function InitialsAvatar({
   name,
   size = 48,
@@ -87,7 +91,7 @@ export function InitialsAvatar({
         filter: dimmed ? "grayscale(100%) brightness(0.45)" : undefined,
         fontSize: size * 0.33,
         fontWeight: 600,
-        color: dimmed ? "#5a5850" : "#5a5850",
+        color: "#5a5850",
       }}
     >
       {initials}
