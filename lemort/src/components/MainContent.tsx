@@ -62,7 +62,7 @@ export default function MainContent() {
     const newPeople = MOCK_PEOPLE.filter(
       (p) => ids.includes(p.id) && !following.has(p.id)
     );
-    setFollowing((prev) => new Set([...prev, ...ids]));
+    setFollowing((prev) => new Set(Array.from(prev).concat(ids)));
     setFollowSheet(null);
     setConfirmation(newPeople.length > 0 ? newPeople : [MOCK_PEOPLE.find((p) => p.id === ids[0])!]);
   };
