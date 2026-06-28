@@ -28,23 +28,57 @@ export default function MainContent() {
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Simulated search against mock data
+  // Live search via Wikidata API
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q || q.length < 2 || searchPath === "private") {
       setSearchResults([]);
       setIsSearching(false);
       return;
     }
     setIsSearching(true);
-    debounce.current = setTimeout(() => {
-      const results = MOCK_PEOPLE.filter(
-        (p) => !p.isPrivate && p.name.toLowerCase().includes(q)
-      );
-      setSearchResults(results);
-      setIsSearching(false);
-    }, 350);
+    debounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error("search failed");
+        const data = await res.json();
+        // Map API results to MockPerson shape for display
+        const results: MockPerson[] = (data.results ?? []).map(
+          (r: {
+            wikidataId: string;
+            name: string;
+            age: number | null;
+            dateOfBirth: string | null;
+            photo: string | null;
+            occupation: string | null;
+            nationality: string | null;
+          }) => ({
+            id: r.wikidataId,
+            name: r.name,
+            age: r.age ?? 0,
+            photo: r.photo,
+            occupation: r.occupation ?? "Public figure",
+            nationality: r.nationality ?? "",
+            isPrivate: false,
+            gender: "man" as const,
+            status: "alive" as const,
+            watcherCount: 0,
+            diedAt: null,
+            notified: false,
+            followedAt: "",
+            wikidataId: r.wikidataId,
+            group: "",
+            groupSuggestions: [],
+          })
+        );
+        setSearchResults(results);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
   }, [query, searchPath]);
 
   const followedPeople = MOCK_PEOPLE.filter((p) => following.has(p.id));
