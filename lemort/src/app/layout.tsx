@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
+import { playfair } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Flatlined.",
-  description: "Real-time death notifications for the people you follow.",
+  title: "Le Mort · Flatlined.",
+  description: "Pay $1. We watch them. You get on with your life.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-black text-white antialiased">
+    <html lang="en" className={playfair.variable}>
+      <body className="min-h-screen antialiased bg-[#f8f8f6]">
         {children}
       </body>
     </html>

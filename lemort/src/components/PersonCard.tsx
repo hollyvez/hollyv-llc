@@ -2,64 +2,146 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { SearchResult } from "./SearchSection";
+import type { MockPerson } from "@/lib/mock-data";
+import { ageQuip, deadQuip, formatDiedAt } from "@/lib/quips";
+import CameoAvatar, { InitialsAvatar } from "./CameoAvatar";
 
-export default function PersonCard({ person }: { person: SearchResult }) {
-  const [following, setFollowing] = useState(false);
-  const [imgError, setImgError] = useState(false);
+interface PersonCardProps {
+  person: MockPerson;
+  isFollowing: boolean;
+  onFollow: (person: MockPerson) => void;
+}
 
-  const initials = person.name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+export default function PersonCard({ person, isFollowing, onFollow }: PersonCardProps) {
+  const [imgErr, setImgErr] = useState(false);
+  const isDead = person.status === "dead";
 
-  return (
-    <div className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 hover:border-zinc-700 transition-colors">
-      {/* Avatar */}
-      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full bg-zinc-800">
-        {person.photo && !imgError ? (
+  const Avatar = () => {
+    if (person.isPrivate) {
+      return <CameoAvatar gender={person.gender} size={48} dimmed={isDead} />;
+    }
+    if (person.photo && !imgErr) {
+      return (
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: "50%",
+            overflow: "hidden",
+            flexShrink: 0,
+            filter: isDead ? "grayscale(100%) brightness(0.45)" : undefined,
+          }}
+        >
           <Image
             src={person.photo}
             alt={person.name}
-            fill
+            width={48}
+            height={48}
             className="object-cover"
-            onError={() => setImgError(true)}
+            onError={() => setImgErr(true)}
             unoptimized
           />
-        ) : (
-          <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-zinc-400">
-            {initials}
-          </span>
-        )}
-      </div>
+        </div>
+      );
+    }
+    return <InitialsAvatar name={person.name} size={48} dimmed={isDead} />;
+  };
 
-      {/* Info */}
+  if (isDead) {
+    return (
+      <div
+        className="flex items-center gap-3 rounded-2xl px-4 py-3 mb-2"
+        style={{
+          background: "#252420",
+          border: "1px solid #1a1916",
+        }}
+      >
+        <Avatar />
+
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold truncate" style={{ color: "#9a9688" }}>
+            {person.name}
+          </p>
+          <p className="text-xs truncate" style={{ color: "#5a5850" }}>
+            Age {person.age} ·{" "}
+            <span className="font-playfair" style={{ fontStyle: "italic" }}>
+              {deadQuip(person.age)}
+            </span>
+          </p>
+          {person.diedAt && (
+            <p className="text-xs mt-0.5" style={{ color: "#4a4840" }}>
+              Departed {formatDiedAt(person.diedAt)}
+            </p>
+          )}
+        </div>
+
+        <div>
+          {person.notified ? (
+            <span
+              className="text-xs px-2 py-1 rounded-full"
+              style={{ background: "#2e2c28", color: "#6a6860" }}
+            >
+              Notified ✓
+            </span>
+          ) : (
+            <span
+              className="text-xs px-2 py-1 rounded-full"
+              style={{ background: "#1e1c18", color: "#4a4840" }}
+            >
+              Missed it · $1
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => onFollow(person)}
+      className="flex items-center gap-3 rounded-2xl px-4 py-3 mb-2 w-full text-left transition-shadow hover:shadow-md"
+      style={{
+        background: "#ffffff",
+        border: "1px solid #e8e4dc",
+      }}
+    >
+      <Avatar />
+
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-white truncate">{person.name}</p>
-        <p className="text-xs text-zinc-500 truncate">
-          {[
-            person.occupation,
-            person.nationality,
-            person.age != null ? `${person.age} yrs` : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+        <p className="font-semibold text-[#1a1a14] truncate">{person.name}</p>
+        <p className="text-xs text-[#999] truncate">
+          {person.occupation}
+          {person.age ? (
+            <>
+              {" "}· {person.age} ·{" "}
+              <span className="font-playfair" style={{ fontStyle: "italic" }}>
+                {ageQuip(person.age)}
+              </span>
+            </>
+          ) : null}
         </p>
       </div>
 
-      {/* CTA */}
-      <button
-        onClick={() => setFollowing((f) => !f)}
-        className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-          following
-            ? "bg-zinc-800 text-zinc-400 hover:bg-red-950 hover:text-red-400"
-            : "bg-white text-black hover:bg-zinc-200"
-        }`}
-      >
-        {following ? "Following" : "Follow · $1"}
-      </button>
-    </div>
+      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+        {isFollowing ? (
+          <span
+            className="text-xs px-2 py-1 rounded-full"
+            style={{ background: "#f0ede8", color: "#999" }}
+          >
+            Watching
+          </span>
+        ) : (
+          <span
+            className="text-xs px-2.5 py-1 rounded-full font-semibold"
+            style={{ background: "#1a1a14", color: "#fff" }}
+          >
+            Follow · $1
+          </span>
+        )}
+        <span className="text-[10px] text-[#ccc]">
+          {person.watcherCount.toLocaleString()} watching
+        </span>
+      </div>
+    </button>
   );
 }

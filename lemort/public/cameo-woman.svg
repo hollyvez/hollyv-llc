@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="background:#e8e0d0">
+  <!-- Simple side-profile woman with updo in dark silhouette -->
+  <g fill="#3a2e20">
+    <!-- Updo bun -->
+    <ellipse cx="58" cy="20" rx="10" ry="8"/>
+    <!-- Hair sweep -->
+    <ellipse cx="52" cy="27" rx="14" ry="8"/>
+    <!-- Head -->
+    <ellipse cx="50" cy="40" rx="13" ry="14"/>
+    <!-- Neck -->
+    <rect x="44" y="52" width="10" height="8"/>
+    <!-- Shoulder/body with curved neckline -->
+    <ellipse cx="48" cy="68" rx="20" ry="14"/>
+  </g>
+</svg>
