@@ -22,20 +22,14 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // MediaWiki full-text search filtered to living humans
-    const searchRes = await fetch(
-      `${WIKIDATA_API}?${new URLSearchParams({
-        action: "query",
-        list: "search",
-        srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
-        srnamespace: "0",
-        srlimit: "8",
-        format: "json",
-        origin: "*",
-      })}`,
-      { headers: { "User-Agent": UA } }
-    );
-    const searchData = await searchRes.json();
+    // MediaWiki full-text search filtered to living humans (POST avoids proxy URL filtering)
+    const searchData = await wbPost({
+      action: "query",
+      list: "search",
+      srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
+      srnamespace: "0",
+      srlimit: "8",
+    });
     const hits: { title: string }[] = searchData.query?.search ?? [];
     const ids = hits.map((h) => h.title);
 
