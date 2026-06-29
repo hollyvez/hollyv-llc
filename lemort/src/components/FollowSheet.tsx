@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { MockPerson } from "@/lib/mock-data";
 import { MOCK_PEOPLE } from "@/lib/mock-data";
 import { ageQuip } from "@/lib/quips";
-import CameoAvatar, { InitialsAvatar } from "./CameoAvatar";
+import CameoAvatar from "./CameoAvatar";
 
 interface FollowSheetProps {
   person: MockPerson;
@@ -51,11 +51,7 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
   const allSelected = MOCK_PEOPLE.filter((p) => selected.has(p.id));
 
   const SmallAvatar = ({ p, size = 40 }: { p: MockPerson; size?: number }) =>
-    p.isPrivate ? (
-      <CameoAvatar gender={p.gender} size={size} />
-    ) : (
-      <InitialsAvatar name={p.name} size={size} />
-    );
+    <CameoAvatar gender={p.gender} size={size} />;
 
   return (
     <>

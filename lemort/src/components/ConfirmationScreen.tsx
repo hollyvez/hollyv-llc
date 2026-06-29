@@ -1,7 +1,6 @@
 "use client";
 
 import type { MockPerson } from "@/lib/mock-data";
-import { InitialsAvatar } from "./CameoAvatar";
 import CameoAvatar from "./CameoAvatar";
 
 interface ConfirmationScreenProps {
@@ -35,11 +34,7 @@ export default function ConfirmationScreen({ people, onDone, onAddMore }: Confir
               className="rounded-full border-4 border-white"
               style={{ zIndex: people.length - i }}
             >
-              {p.isPrivate ? (
-                <CameoAvatar gender={p.gender} size={52} />
-              ) : (
-                <InitialsAvatar name={p.name} size={52} />
-              )}
+              <CameoAvatar gender={p.gender} size={52} />
             </div>
           ))}
         </div>

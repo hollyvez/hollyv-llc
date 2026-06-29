@@ -1,7 +1,7 @@
 "use client";
 
 import type { MockPerson } from "@/lib/mock-data";
-import CameoAvatar, { InitialsAvatar } from "./CameoAvatar";
+import CameoAvatar from "./CameoAvatar";
 
 interface AvatarStripProps {
   people: MockPerson[];
@@ -38,11 +38,7 @@ export default function AvatarStrip({ people, onSelect }: AvatarStripProps) {
                   background: isDotElevated ? "#c0392b" : "transparent",
                 }}
               >
-                {person.isPrivate ? (
-                  <CameoAvatar gender={person.gender} size={44} />
-                ) : (
-                  <InitialsAvatar name={person.name} size={44} />
-                )}
+                <CameoAvatar gender={person.gender} size={44} />
               </div>
               {/* Status dot */}
               <span

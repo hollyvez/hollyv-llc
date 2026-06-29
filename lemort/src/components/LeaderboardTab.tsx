@@ -1,6 +1,5 @@
 import type { MockPerson } from "@/lib/mock-data";
 import { formatDiedAt } from "@/lib/quips";
-import { InitialsAvatar } from "./CameoAvatar";
 import CameoAvatar from "./CameoAvatar";
 
 interface LeaderboardTabProps {
@@ -43,11 +42,7 @@ export default function LeaderboardTab({ people, onSelect }: LeaderboardTabProps
             </span>
 
             {/* Avatar */}
-            {person.isPrivate ? (
-              <CameoAvatar gender={person.gender} size={40} dimmed={isDead} />
-            ) : (
-              <InitialsAvatar name={person.name} size={40} dimmed={isDead} />
-            )}
+            <CameoAvatar gender={person.gender} size={40} dimmed={isDead} />
 
             {/* Info */}
             <div className="flex-1 min-w-0">

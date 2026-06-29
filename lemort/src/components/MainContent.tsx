@@ -51,6 +51,7 @@ export default function MainContent() {
             age: number | null;
             dateOfBirth: string | null;
             photo: string | null;
+            gender: "man" | "woman";
             occupation: string | null;
             nationality: string | null;
           }) => ({
@@ -61,7 +62,7 @@ export default function MainContent() {
             occupation: r.occupation ?? "Public figure",
             nationality: r.nationality ?? "",
             isPrivate: false,
-            gender: "man" as const,
+            gender: r.gender ?? ("man" as const),
             status: "alive" as const,
             watcherCount: 0,
             diedAt: null,

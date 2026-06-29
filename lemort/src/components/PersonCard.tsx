@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { MockPerson } from "@/lib/mock-data";
 import { ageQuip, deadQuip, formatDiedAt } from "@/lib/quips";
-import CameoAvatar, { InitialsAvatar } from "./CameoAvatar";
+import CameoAvatar from "./CameoAvatar";
 
 interface PersonCardProps {
   person: MockPerson;
@@ -43,7 +43,7 @@ export default function PersonCard({ person, isFollowing, onFollow }: PersonCard
         </div>
       );
     }
-    return <InitialsAvatar name={person.name} size={48} dimmed={isDead} />;
+    return <CameoAvatar gender={person.gender} size={48} dimmed={isDead} />;
   };
 
   if (isDead) {

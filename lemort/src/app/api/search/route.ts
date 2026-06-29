@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     const claimsEntities = claimsData.entities ?? {};
     const labelEntities = labelsData.entities ?? {};
 
-    type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
+    type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; gender: "man" | "woman"; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
 
     for (const id of ids) {
@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
       const photoFile: string | null = (ec.claims?.P18 as { mainsnak?: { datavalue?: { value?: string } } }[])?.[0]?.mainsnak?.datavalue?.value ?? null;
       const occQid: string | null = (ec.claims?.P106 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
       const natQid: string | null = (ec.claims?.P27 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
+      const genderQid: string | null = (ec.claims?.P21 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
       const sitelinkTitle: string | undefined = (el?.sitelinks as { enwiki?: { title?: string } })?.enwiki?.title;
       const name: string = (el?.labels as { en?: { value?: string } })?.en?.value ?? sitelinkTitle ?? id;
 
@@ -65,6 +66,7 @@ export async function GET(req: NextRequest) {
         name,
         dateOfBirth: dobTime ? (dobTime.match(/[+-](\d{4}-\d{2}-\d{2})/)?.[1] ?? null) : null,
         photo: photoFile ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(photoFile.replace(/ /g, "_"))}?width=200` : null,
+        gender: genderQid === "Q6581072" ? "woman" : "man",
         occQid,
         natQid,
       });
@@ -88,6 +90,7 @@ export async function GET(req: NextRequest) {
       dateOfBirth: r.dateOfBirth,
       age: r.dateOfBirth ? calcAge(r.dateOfBirth) : null,
       photo: r.photo,
+      gender: r.gender,
       occupation: r.occQid ? (labelMap[r.occQid] ?? null) : null,
       nationality: r.natQid ? (labelMap[r.natQid] ?? null) : null,
     }));
