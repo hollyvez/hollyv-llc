@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
 
     const claimsEntities = claimsData.entities ?? {};
     const labelEntities = labelsData.entities ?? {};
+    console.log("[search] Q22686 labels response:", JSON.stringify(labelEntities["Q22686"]?.labels));
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
