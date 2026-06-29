@@ -37,17 +37,18 @@ export async function GET(req: NextRequest) {
     console.log(`[search] "${q}" → ${ids.length} human hits: ${ids.join(", ")}`);
     if (ids.length === 0) return NextResponse.json({ results: [] });
 
-    // Fetch labels, photo, occupation, nationality in one call
-    const entityParams = new URLSearchParams({
+    // Fetch labels, photo, occupation, nationality — POST to avoid URL length limits
+    const entityBody = new URLSearchParams({
       action: "wbgetentities",
       ids: ids.join("|"),
       props: "claims|labels",
       languages: "en",
       format: "json",
-      origin: "*",
     });
-    const entityRes = await fetch(`${WIKIDATA_API}?${entityParams}`, {
-      headers: { "User-Agent": UA },
+    const entityRes = await fetch(WIKIDATA_API, {
+      method: "POST",
+      headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
+      body: entityBody.toString(),
     });
     const entityData = await entityRes.json();
     const entities = entityData.entities ?? {};
@@ -84,8 +85,8 @@ export async function GET(req: NextRequest) {
     const qids = Array.from(new Set(raw.flatMap((r) => [r.occQid, r.natQid].filter(Boolean) as string[])));
     const labelMap: Record<string, string> = {};
     if (qids.length > 0) {
-      const lp = new URLSearchParams({ action: "wbgetentities", ids: qids.join("|"), props: "labels", languages: "en", format: "json", origin: "*" });
-      const lr = await fetch(`${WIKIDATA_API}?${lp}`, { headers: { "User-Agent": UA } });
+      const lp = new URLSearchParams({ action: "wbgetentities", ids: qids.join("|"), props: "labels", languages: "en", format: "json" });
+      const lr = await fetch(WIKIDATA_API, { method: "POST", headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" }, body: lp.toString() });
       const ld = await lr.json();
       for (const [qid, ent] of Object.entries(ld.entities ?? {}) as [string, { labels?: { en?: { value: string } } }][]) {
         if (ent.labels?.en?.value) labelMap[qid] = ent.labels.en.value;
