@@ -5,6 +5,16 @@ export const runtime = "nodejs";
 const WIKIDATA_API = "https://www.wikidata.org/w/api.php";
 const UA = "Flatlined/1.0 (lemort-app)";
 
+async function wbPost(params: Record<string, string>) {
+  const body = new URLSearchParams({ ...params, format: "json" });
+  const res = await fetch(WIKIDATA_API, {
+    method: "POST",
+    headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+  return res.json();
+}
+
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length < 2) {
@@ -12,63 +22,49 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Use MediaWiki full-text search with Wikidata statement filters:
-    // haswbstatement:P31=Q5  → must be a human
-    // -haswbstatement:P570   → must NOT have a death date
-    const searchParams = new URLSearchParams({
-      action: "query",
-      list: "search",
-      srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
-      srnamespace: "0",
-      srlimit: "16",
-      format: "json",
-      origin: "*",
-    });
-
-    const searchRes = await fetch(`${WIKIDATA_API}?${searchParams}`, {
-      headers: { "User-Agent": UA },
-    });
-    const searchText = await searchRes.text();
-    console.log(`[search] status=${searchRes.status} body preview: ${searchText.slice(0, 200)}`);
-    const searchData = JSON.parse(searchText);
+    // MediaWiki full-text search filtered to living humans
+    const searchRes = await fetch(
+      `${WIKIDATA_API}?${new URLSearchParams({
+        action: "query",
+        list: "search",
+        srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
+        srnamespace: "0",
+        srlimit: "8",
+        format: "json",
+        origin: "*",
+      })}`,
+      { headers: { "User-Agent": UA } }
+    );
+    const searchData = await searchRes.json();
     const hits: { title: string }[] = searchData.query?.search ?? [];
-    const ids = hits.map((h) => h.title); // titles are Q-numbers on Wikidata
+    const ids = hits.map((h) => h.title);
 
-    console.log(`[search] "${q}" → ${ids.length} human hits: ${ids.join(", ")}`);
     if (ids.length === 0) return NextResponse.json({ results: [] });
 
-    // Fetch labels, photo, occupation, nationality — POST to avoid URL length limits
-    const entityBody = new URLSearchParams({
-      action: "wbgetentities",
-      ids: ids.join("|"),
-      props: "claims|labels",
-      languages: "en",
-      format: "json",
-    });
-    const entityRes = await fetch(WIKIDATA_API, {
-      method: "POST",
-      headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
-      body: entityBody.toString(),
-    });
-    const entityData = await entityRes.json();
-    const entities = entityData.entities ?? {};
-    console.log(`[search] Q22686 label check:`, JSON.stringify((entities["Q22686"] as { labels?: unknown })?.labels));
+    // Fetch claims and labels in separate calls — Trump's claims are huge and
+    // collapse labels when bundled together in one response.
+    const [claimsData, labelsData] = await Promise.all([
+      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "claims" }),
+      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "labels", languages: "en" }),
+    ]);
+
+    const claimsEntities = claimsData.entities ?? {};
+    const labelEntities = labelsData.entities ?? {};
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
 
     for (const id of ids) {
-      if (raw.length >= 8) break;
-      const e = entities[id];
-      if (!e || e.missing) continue;
+      const ec = claimsEntities[id];
+      const el = labelEntities[id];
+      if (!ec || ec.missing) continue;
 
-      const dobTime: string | null = (e.claims?.P569 as { mainsnak?: { datavalue?: { value?: { time?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.time ?? null;
-      const photoFile: string | null = (e.claims?.P18 as { mainsnak?: { datavalue?: { value?: string } } }[])?.[0]?.mainsnak?.datavalue?.value ?? null;
-      const occQid: string | null = (e.claims?.P106 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
-      const natQid: string | null = (e.claims?.P27 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
-      const name: string = (e.labels as { en?: { value?: string } })?.en?.value ?? id;
+      const dobTime: string | null = (ec.claims?.P569 as { mainsnak?: { datavalue?: { value?: { time?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.time ?? null;
+      const photoFile: string | null = (ec.claims?.P18 as { mainsnak?: { datavalue?: { value?: string } } }[])?.[0]?.mainsnak?.datavalue?.value ?? null;
+      const occQid: string | null = (ec.claims?.P106 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
+      const natQid: string | null = (ec.claims?.P27 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
+      const name: string = (el?.labels as { en?: { value?: string } })?.en?.value ?? id;
 
-      console.log(`  ✓ ${id} (${name}) photo=${photoFile} occ=${occQid}`);
       raw.push({
         wikidataId: id,
         name,
@@ -85,9 +81,7 @@ export async function GET(req: NextRequest) {
     const qids = Array.from(new Set(raw.flatMap((r) => [r.occQid, r.natQid].filter(Boolean) as string[])));
     const labelMap: Record<string, string> = {};
     if (qids.length > 0) {
-      const lp = new URLSearchParams({ action: "wbgetentities", ids: qids.join("|"), props: "labels", languages: "en", format: "json" });
-      const lr = await fetch(WIKIDATA_API, { method: "POST", headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" }, body: lp.toString() });
-      const ld = await lr.json();
+      const ld = await wbPost({ action: "wbgetentities", ids: qids.join("|"), props: "labels", languages: "en" });
       for (const [qid, ent] of Object.entries(ld.entities ?? {}) as [string, { labels?: { en?: { value: string } } }][]) {
         if (ent.labels?.en?.value) labelMap[qid] = ent.labels.en.value;
       }
@@ -103,7 +97,6 @@ export async function GET(req: NextRequest) {
       nationality: r.natQid ? (labelMap[r.natQid] ?? null) : null,
     }));
 
-    console.log(`[search] returning ${results.length} results`);
     return NextResponse.json({ results });
 
   } catch (err) {
