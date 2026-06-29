@@ -17,7 +17,8 @@ function mockFetch(handlers: ((body: URLSearchParams) => unknown)[]) {
     const body = new URLSearchParams(init?.body as string);
     const handler = handlers[call++];
     const data = handler(body);
-    return { json: async () => data } as Response;
+    const text = JSON.stringify(data);
+    return { text: async () => text } as unknown as Response;
   });
 }
 
