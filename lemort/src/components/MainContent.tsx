@@ -32,7 +32,7 @@ export default function MainContent() {
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
     const q = query.trim();
-    if (!q || q.length < 2 || searchPath === "private") {
+    if (!q || q.length < 3 || searchPath === "private") {
       setSearchResults([]);
       setIsSearching(false);
       return;
@@ -79,7 +79,7 @@ export default function MainContent() {
       } finally {
         setIsSearching(false);
       }
-    }, 400);
+    }, 700);
   }, [query, searchPath]);
 
   const followedPeople = MOCK_PEOPLE.filter((p) => following.has(p.id));
@@ -113,7 +113,7 @@ export default function MainContent() {
     // In real app: trigger Stripe + DB
   };
 
-  const showingSearch = query.trim().length >= 2 && searchPath === "famous";
+  const showingSearch = query.trim().length >= 3 && searchPath === "famous";
   const displayList = showingSearch ? searchResults : [];
 
   return (

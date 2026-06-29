@@ -17,8 +17,8 @@ async function wbPost(params: Record<string, string>) {
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
-  if (!q || q.length < 2) {
-    return NextResponse.json({ error: "Query param `q` must be at least 2 characters" }, { status: 400 });
+  if (!q || q.length < 3) {
+    return NextResponse.json({ error: "Query param `q` must be at least 3 characters" }, { status: 400 });
   }
 
   try {
