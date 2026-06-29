@@ -53,8 +53,9 @@ export async function GET(req: NextRequest) {
     // Diagnose: fetch Q22686 alone
     const solo = await fetch(`${WIKIDATA_API}?action=wbgetentities&ids=Q22686&props=labels&languages=en&format=json`, { headers: { "User-Agent": UA } });
     const soloData = await solo.json();
-    console.log("[search] Q22686 solo GET labels:", JSON.stringify(soloData?.entities?.Q22686?.labels));
-    console.log("[search] Q22686 batch labels response:", JSON.stringify(labelEntities["Q22686"]?.labels));
+    const soloEntity = soloData?.entities?.Q22686;
+    console.log("[search] Q22686 solo entity keys:", Object.keys(soloEntity ?? {}));
+    console.log("[search] Q22686 solo full entity:", JSON.stringify(soloEntity));
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
