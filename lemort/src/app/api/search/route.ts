@@ -45,18 +45,11 @@ export async function GET(req: NextRequest) {
     // collapse labels when bundled together in one response.
     const [claimsData, labelsData] = await Promise.all([
       wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "claims" }),
-      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "labels", languages: "en" }),
+      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "labels|sitelinks", languages: "en", sitefilter: "enwiki" }),
     ]);
 
     const claimsEntities = claimsData.entities ?? {};
     const labelEntities = labelsData.entities ?? {};
-    // Diagnose: fetch Q22686 without language filter
-    const solo = await fetch(`${WIKIDATA_API}?action=wbgetentities&ids=Q22686&props=labels&format=json`, { headers: { "User-Agent": UA } });
-    const soloData = await solo.json();
-    const soloEntity = soloData?.entities?.Q22686;
-    const soloLabels = soloEntity?.labels ?? {};
-    console.log("[search] Q22686 label keys:", Object.keys(soloLabels).slice(0, 10));
-    console.log("[search] Q22686 en label:", JSON.stringify(soloLabels["en"]));
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
@@ -70,7 +63,8 @@ export async function GET(req: NextRequest) {
       const photoFile: string | null = (ec.claims?.P18 as { mainsnak?: { datavalue?: { value?: string } } }[])?.[0]?.mainsnak?.datavalue?.value ?? null;
       const occQid: string | null = (ec.claims?.P106 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
       const natQid: string | null = (ec.claims?.P27 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
-      const name: string = (el?.labels as { en?: { value?: string } })?.en?.value ?? id;
+      const sitelinkTitle: string | undefined = (el?.sitelinks as { enwiki?: { title?: string } })?.enwiki?.title;
+      const name: string = (el?.labels as { en?: { value?: string } })?.en?.value ?? sitelinkTitle ?? id;
 
       raw.push({
         wikidataId: id,
