@@ -50,12 +50,13 @@ export async function GET(req: NextRequest) {
 
     const claimsEntities = claimsData.entities ?? {};
     const labelEntities = labelsData.entities ?? {};
-    // Diagnose: fetch Q22686 alone
-    const solo = await fetch(`${WIKIDATA_API}?action=wbgetentities&ids=Q22686&props=labels&languages=en&format=json`, { headers: { "User-Agent": UA } });
+    // Diagnose: fetch Q22686 without language filter
+    const solo = await fetch(`${WIKIDATA_API}?action=wbgetentities&ids=Q22686&props=labels&format=json`, { headers: { "User-Agent": UA } });
     const soloData = await solo.json();
     const soloEntity = soloData?.entities?.Q22686;
-    console.log("[search] Q22686 solo entity keys:", Object.keys(soloEntity ?? {}));
-    console.log("[search] Q22686 solo full entity:", JSON.stringify(soloEntity));
+    const soloLabels = soloEntity?.labels ?? {};
+    console.log("[search] Q22686 label keys:", Object.keys(soloLabels).slice(0, 10));
+    console.log("[search] Q22686 en label:", JSON.stringify(soloLabels["en"]));
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
