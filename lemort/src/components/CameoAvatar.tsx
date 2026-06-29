@@ -6,11 +6,15 @@ interface CameoAvatarProps {
   gender: "man" | "woman";
   size?: number;
   dimmed?: boolean;
+  photo?: string | null;
 }
 
-export default function CameoAvatar({ gender, size = 48, dimmed = false }: CameoAvatarProps) {
-  const [err, setErr] = useState(false);
-  const src = gender === "man" ? "/cameo-man.png" : "/cameo-woman.png";
+export default function CameoAvatar({ gender, size = 48, dimmed = false, photo }: CameoAvatarProps) {
+  const [photoErr, setPhotoErr] = useState(false);
+  const [cameoErr, setCameoErr] = useState(false);
+
+  const cameoSrc = gender === "man" ? "/cameo-man.png" : "/cameo-woman.png";
+  const showPhoto = photo && !photoErr;
 
   return (
     <div
@@ -23,15 +27,25 @@ export default function CameoAvatar({ gender, size = 48, dimmed = false }: Cameo
         filter: dimmed ? "grayscale(100%) brightness(0.45)" : undefined,
       }}
     >
-      {!err ? (
+      {showPhoto ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={src}
+          src={photo}
+          alt=""
+          width={size}
+          height={size}
+          style={{ width: size, height: size, objectFit: "cover" }}
+          onError={() => setPhotoErr(true)}
+        />
+      ) : !cameoErr ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={cameoSrc}
           alt={`${gender} cameo`}
           width={size}
           height={size}
           style={{ width: size, height: size, objectFit: "cover" }}
-          onError={() => setErr(true)}
+          onError={() => setCameoErr(true)}
         />
       ) : (
         <FallbackSilhouette gender={gender} size={size} />
@@ -56,45 +70,6 @@ function FallbackSilhouette({ gender, size }: { gender: "man" | "woman"; size: n
       }}
     >
       {gender === "man" ? "🎩" : "🪞"}
-    </div>
-  );
-}
-
-/** Initials avatar for public figures without a confirmed photo */
-export function InitialsAvatar({
-  name,
-  size = 48,
-  dimmed = false,
-}: {
-  name: string;
-  size?: number;
-  dimmed?: boolean;
-}) {
-  const initials = name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: dimmed ? "#3a3830" : "#e8e4dc",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        filter: dimmed ? "grayscale(100%) brightness(0.45)" : undefined,
-        fontSize: size * 0.33,
-        fontWeight: 600,
-        color: "#5a5850",
-      }}
-    >
-      {initials}
     </div>
   );
 }

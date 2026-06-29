@@ -89,17 +89,17 @@ export default function MainContent() {
   ];
 
   const handleFollow = (person: MockPerson) => {
-    if (person.status === "dead") return;
     setFollowSheet(person);
   };
 
   const handleConfirm = (ids: string[]) => {
+    if (ids.length === 0) { setFollowSheet(null); return; }
     const newPeople = MOCK_PEOPLE.filter(
       (p) => ids.includes(p.id) && !following.has(p.id)
     );
     setFollowing((prev) => new Set(Array.from(prev).concat(ids)));
     setFollowSheet(null);
-    setConfirmation(newPeople.length > 0 ? newPeople : [MOCK_PEOPLE.find((p) => p.id === ids[0])!]);
+    if (newPeople.length > 0) setConfirmation(newPeople);
   };
 
   const handlePrivateSubmit = (data: PrivateFormData) => {

@@ -19,10 +19,15 @@ export function deadQuip(age: number | null): string {
   return "unexpected";
 }
 
+/** Deterministic quip for deceased — alternates based on first char of name */
+export function getDeadQuip(name: string): string {
+  return name.charCodeAt(0) % 2 === 0 ? "finally" : "at last";
+}
+
 export function formatDiedAt(diedAt: string): string {
-  return new Date(diedAt).toLocaleDateString("en-US", {
-    month: "long",
+  return new Date(diedAt).toLocaleDateString("en-GB", {
     day: "numeric",
+    month: "long",
     year: "numeric",
   });
 }
