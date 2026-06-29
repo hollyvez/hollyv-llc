@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
     });
     const entityData = await entityRes.json();
     const entities = entityData.entities ?? {};
+    console.log(`[search] Q22686 label check:`, JSON.stringify((entities["Q22686"] as { labels?: unknown })?.labels));
 
     type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; occQid: string | null; natQid: string | null };
     const raw: Raw[] = [];
