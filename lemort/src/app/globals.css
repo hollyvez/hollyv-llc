@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-playfair: "Playfair Display", Georgia, serif;
+}
+
+.font-playfair {
+  font-family: var(--font-playfair);
+}
+
+/* Animated live dot */
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.live-dot {
+  animation: pulse-green 1.8s ease-in-out infinite;
+}
+
+/* Sheet slide-up — spring bounce */
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0.8; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.sheet-enter {
+  animation: slide-up 0.38s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+}
+
+/* Backdrop fade */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.backdrop-enter {
+  animation: fade-in 0.2s ease forwards;
+}
+
+/* Confirmation pop */
+@keyframes pop-in {
+  0%   { transform: scale(0.92) translateY(12px); opacity: 0; }
+  100% { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+.confirm-enter {
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Lemort sparkle — DOM-injected particles */
+@keyframes lemort-sparkle {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+}
