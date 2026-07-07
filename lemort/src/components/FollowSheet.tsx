@@ -5,6 +5,7 @@ import type { MockPerson } from "@/lib/mock-data";
 import { MOCK_PEOPLE } from "@/lib/mock-data";
 import { ageQuip, getDeadQuip, formatDiedAt } from "@/lib/quips";
 import CameoAvatar from "./CameoAvatar";
+import PaymentSheet from "./PaymentSheet";
 
 interface FollowSheetProps {
   person: MockPerson;
@@ -40,8 +41,8 @@ function fireSparkles(originEl: HTMLElement, container: HTMLElement) {
 
 export default function FollowSheet({ person, following, onConfirm, onDismiss }: FollowSheetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Primary person is always selected; start with only them
   const [selected, setSelected] = useState<Set<string>>(new Set([person.id]));
+  const [showPayment, setShowPayment] = useState(false);
   const isDead = person.status === "dead";
 
   const groupMembers = MOCK_PEOPLE.filter(
@@ -69,7 +70,10 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
   const basketPeople = MOCK_PEOPLE.filter((p) => selected.has(p.id) && !following.has(p.id));
 
   const handleCta = () => {
-    // TODO: wire Stripe — for now confirm directly
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = () => {
     onConfirm(Array.from(selected).filter((id) => !following.has(id)));
   };
 
@@ -240,13 +244,31 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
             </div>
           )}
 
-          <button
-            onClick={onDismiss}
-            className="w-full text-center mt-4"
-            style={{ fontSize: 11, color: "#bbb" }}
-          >
-            maybe later
-          </button>
+          {!showPayment && (
+            <button
+              onClick={onDismiss}
+              className="w-full text-center mt-4"
+              style={{ fontSize: 11, color: "#bbb" }}
+            >
+              maybe later
+            </button>
+          )}
+
+          {showPayment && (
+            <div className="mt-4">
+              <p
+                className="font-playfair text-center mb-4"
+                style={{ fontStyle: "italic", fontSize: 13, color: "#5a5850" }}
+              >
+                ${basketCount} · one-time · alerts forever
+              </p>
+              <PaymentSheet
+                personIds={Array.from(selected).filter((id) => !following.has(id))}
+                onSuccess={handlePaymentSuccess}
+                onBack={() => setShowPayment(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
