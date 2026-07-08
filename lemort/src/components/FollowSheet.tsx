@@ -71,6 +71,7 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
 
   const handleCta = () => {
     setShowPayment(true);
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePaymentSuccess = () => {
@@ -205,8 +206,8 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
             </div>
           )}
 
-          {/* Basket — only shown when at least 1 new person */}
-          {basketCount > 0 && (
+          {/* Basket — only shown when at least 1 new person and not in payment step */}
+          {basketCount > 0 && !showPayment && (
             <div
               className="mt-4 rounded-[10px] px-3 py-3"
               style={{ background: "#1a1a14" }}
