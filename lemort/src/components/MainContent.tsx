@@ -21,6 +21,8 @@ export default function MainContent() {
   const [isSearching, setIsSearching] = useState(false);
 
   const [following, setFollowing] = useState<Set<string>>(INITIAL_FOLLOWING);
+  // Wikidata people who've been followed — not in MOCK_PEOPLE
+  const [watchedReal, setWatchedReal] = useState<MockPerson[]>([]);
   const [followSheet, setFollowSheet] = useState<MockPerson | null>(null);
   const [confirmation, setConfirmation] = useState<MockPerson[] | null>(null);
 
@@ -82,7 +84,8 @@ export default function MainContent() {
     }, 700);
   }, [query, searchPath]);
 
-  const followedPeople = MOCK_PEOPLE.filter((p) => following.has(p.id));
+  const allKnownPeople = [...MOCK_PEOPLE, ...watchedReal];
+  const followedPeople = allKnownPeople.filter((p) => following.has(p.id));
   const livingFirst = [
     ...followedPeople.filter((p) => p.status === "alive"),
     ...followedPeople.filter((p) => p.status === "dead"),
@@ -94,7 +97,17 @@ export default function MainContent() {
 
   const handleConfirm = (ids: string[]) => {
     if (ids.length === 0) { setFollowSheet(null); return; }
-    const newPeople = MOCK_PEOPLE.filter(
+    // Capture any Wikidata search results being followed for the first time
+    const newRealPeople = searchResults.filter(
+      (p) => ids.includes(p.id) && !following.has(p.id)
+    );
+    if (newRealPeople.length > 0) {
+      setWatchedReal((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        return [...prev, ...newRealPeople.filter((p) => !existingIds.has(p.id))];
+      });
+    }
+    const newPeople = allKnownPeople.filter(
       (p) => ids.includes(p.id) && !following.has(p.id)
     );
     setFollowing((prev) => new Set(Array.from(prev).concat(ids)));
