@@ -4,9 +4,6 @@ import { Knock } from "@knocklabs/node";
 
 export const runtime = "nodejs";
 
-// Disable body parsing — Stripe needs the raw body to verify the signature
-export const config = { api: { bodyParser: false } };
-
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
