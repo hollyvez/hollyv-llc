@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Knock } from "@knocklabs/node";
 import { prisma } from "@/lib/prisma";
 import { fetchMonthlyDeaths } from "@/lib/wikipedia";
 
@@ -91,12 +92,25 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
     newlyMarked++;
     watchersToNotify += person.watches.length;
 
-    // TODO: trigger notifications via Knock/Resend/Twilio for each watcher.
-    // For now, just log — the notification layer will be wired up separately.
     console.log(
       `[cron] Marked ${person.name} (${person.wikidataId}) deceased on ${deathRecord.diedAt.toISOString()}. ` +
         `${person.watches.length} watcher(s) to notify.`
     );
+
+    // Notify each watcher via Knock
+    if (process.env.KNOCK_SECRET_KEY && person.watches.length > 0) {
+      const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
+      await knock.workflows.trigger("death-alert-email", {
+        recipients: person.watches.map((w) => ({
+          id: w.user.id,
+          email: w.user.email,
+        })),
+        data: {
+          person_name: person.name,
+          died_on: deathRecord.diedAt.toISOString().split("T")[0],
+        },
+      });
+    }
   }
 
   return {

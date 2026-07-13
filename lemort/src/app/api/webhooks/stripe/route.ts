@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { Knock } from "@knocklabs/node";
 
 export const runtime = "nodejs";
 
