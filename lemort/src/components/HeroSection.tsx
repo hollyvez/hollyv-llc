@@ -7,7 +7,7 @@ export default function HeroSection() {
           className="text-5xl font-playfair"
           style={{ fontStyle: "italic", fontWeight: 700, color: "#1a1a14" }}
         >
-          Le Mort
+          Les Morts
         </h1>
         <span
           className="text-xl font-playfair"
