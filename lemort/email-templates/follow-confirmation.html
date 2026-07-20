@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>You're watching {{subjectName}}.</title>
+  <!--
+    TEMPLATE VARIABLES
+    {{subjectName}}   e.g. "Dolly Parton"
+    {{age}}           e.g. "78"
+    {{quip}}          live-state age quip, e.g. "against all odds"
+    {{watcherCount}}  e.g. "7,891"
+    {{photoUrl}}
+    {{unsubscribeUrl}}
+    Subject line:  You're watching {{subjectName}}.
+    Preheader:     Nothing to do now. That's the point.
+  -->
+</head>
+<body style="margin:0; padding:0; background-color:#f8f8f6; -webkit-text-size-adjust:100%;">
+
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Nothing to do now. That's the point.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f8f6;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
+
+          <!-- Logo lockup -->
+          <tr>
+            <td align="left" style="padding: 0 4px 6px 4px;">
+              <span style="font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 26px; color: #1a1a14;">Les Morts</span>
+              <span style="font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 12px; color: #999;">&nbsp;aka Flatlined.</span>
+            </td>
+          </tr>
+          <tr>
+            <td align="left" style="padding: 0 4px 24px 4px; font-family: Georgia, serif; font-style: italic; font-size: 10px; color: #bbb;">
+              not to be confused with la petite mort
+            </td>
+          </tr>
+
+          <!-- The live (white) card -->
+          <tr>
+            <td style="background-color:#ffffff; border:1px solid #e8e4dc; border-radius:14px; padding: 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="56" valign="top" style="padding-right: 16px;">
+                    <img src="{{photoUrl}}" width="56" height="56" alt="" style="display:block; border-radius:50%; border:1px solid #e8e4dc;">
+                  </td>
+                  <td valign="middle">
+                    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 600; color: #1a1a14;">
+                      {{subjectName}}
+                    </div>
+                    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #999; padding-top: 3px;">
+                      Age {{age}} &middot; {{quip}}
+                    </div>
+                    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #2e7d32; padding-top: 6px;">
+                      &#9679; Alive, for now
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #444; padding-top: 20px;">
+                That's it. There's nothing to do. We watch, you live.
+              </div>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.6; color: #999; padding-top: 8px;">
+                If anything changes, you'll be the first to know. Technically second &mdash; they'll know first, briefly.
+              </div>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #bbb; padding-top: 16px;">
+                {{watcherCount}} watching &middot; $1 &middot; non-refundable, obviously
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding: 28px 4px 8px 4px;">
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: #999; padding-bottom: 14px;">
+                A watchlist of one is just a vigil.
+              </div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background-color:#1a1a14; border-radius:8px;">
+                    <a href="https://lesmorts.org" style="display:inline-block; padding: 12px 26px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 500; color: #f0ede6; text-decoration: none;">
+                      Complete the set &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #bbb; padding-top: 10px;">
+                Rolling Stones sold separately. Literally, per member.
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 32px 4px 0 4px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.7; color: #bbb;">
+              You received this because you paid $1 to watch {{subjectName}}.<br>
+              Money well spent.<br><br>
+              <a href="{{unsubscribeUrl}}" style="color:#999; text-decoration: underline;">Unsubscribe</a>
+              &nbsp;&middot;&nbsp;
+              <a href="https://lesmorts.org" style="color:#999; text-decoration: underline;">lesmorts.org</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

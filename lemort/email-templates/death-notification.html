@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{subjectName}} has departed.</title>
+  <!--
+    TEMPLATE VARIABLES
+    {{subjectName}}   e.g. "Mick Jagger"
+    {{age}}           e.g. "80"
+    {{deathQuip}}     e.g. "a good run" / "finally" — dead-state quip
+    {{departedDate}}  e.g. "20 July 2026"
+    {{source}}        e.g. "Wikipedia" / "public records"
+    {{photoUrl}}      pre-dimmed/grayscale image served by us (email clients ignore CSS filters)
+    {{unsubscribeUrl}}
+    Subject line:  {{subjectName}} has flatlined.
+    Preheader:     Your dollar has matured.
+  -->
+</head>
+<body style="margin:0; padding:0; background-color:#f8f8f6; -webkit-text-size-adjust:100%;">
+
+  <!-- Preheader (hidden) -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Your dollar has matured.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f8f6;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
+
+          <!-- Logo lockup -->
+          <tr>
+            <td align="left" style="padding: 0 4px 6px 4px;">
+              <span style="font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 26px; color: #1a1a14;">Les Morts</span>
+              <span style="font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 12px; color: #999;">&nbsp;aka Flatlined.</span>
+            </td>
+          </tr>
+          <tr>
+            <td align="left" style="padding: 0 4px 24px 4px; font-family: Georgia, serif; font-style: italic; font-size: 10px; color: #bbb;">
+              not to be confused with la petite mort
+            </td>
+          </tr>
+
+          <!-- The dark card -->
+          <tr>
+            <td style="background-color:#252420; border:1px solid #1a1916; border-radius:14px; padding: 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="56" valign="top" style="padding-right: 16px;">
+                    <img src="{{photoUrl}}" width="56" height="56" alt="" style="display:block; border-radius:50%; border:1px solid #3a3830;">
+                  </td>
+                  <td valign="middle">
+                    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 600; color: #9a9688;">
+                      {{subjectName}}
+                    </div>
+                    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #5a5850; padding-top: 3px;">
+                      Age {{age}} &middot; {{deathQuip}}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- The flatline -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 22px 0;">
+                <tr>
+                  <td style="border-top: 1px solid #c0392b; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.55; color: #d8d4c8;">
+                {{subjectName}} has departed.
+              </div>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.6; color: #8a8878; padding-top: 10px;">
+                You knew before almost everyone. That was the whole arrangement.
+              </div>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #5a5850; padding-top: 18px;">
+                Confirmed {{departedDate}} via {{source}} &middot; Notified &#10003;
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding: 28px 4px 8px 4px;">
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: #999; padding-bottom: 14px;">
+                Your watchlist is one person shorter.
+              </div>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background-color:#1a1a14; border-radius:8px;">
+                    <a href="https://lesmorts.org" style="display:inline-block; padding: 12px 26px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 500; color: #f0ede6; text-decoration: none;">
+                      Find someone alive &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 11px; color: #bbb; padding-top: 10px;">
+                It's $1. They're not getting any younger.
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 32px 4px 0 4px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.7; color: #bbb;">
+              You received this because you paid $1 to be notified when {{subjectName}} departed.<br>
+              We held up our end.<br><br>
+              <a href="{{unsubscribeUrl}}" style="color:#999; text-decoration: underline;">Unsubscribe</a>
+              &nbsp;&middot;&nbsp;
+              <a href="https://lesmorts.org" style="color:#999; text-decoration: underline;">lesmorts.org</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -19,13 +19,13 @@
   animation: pulse-green 1.8s ease-in-out infinite;
 }
 
-/* Sheet slide-up — spring bounce */
-@keyframes slide-up {
-  from { transform: translateY(100%); opacity: 0.8; }
-  to   { transform: translateY(0);    opacity: 1; }
+/* Sheet pop-in — centered modal */
+@keyframes sheet-pop {
+  from { transform: translate(-50%, -46%); opacity: 0; }
+  to   { transform: translate(-50%, -50%); opacity: 1; }
 }
 .sheet-enter {
-  animation: slide-up 0.38s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+  animation: sheet-pop 0.32s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
 }
 
 /* Backdrop fade */

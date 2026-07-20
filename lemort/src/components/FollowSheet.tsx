@@ -90,8 +90,19 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
       {/* Sheet */}
       <div
         ref={containerRef}
-        className="fixed bottom-0 left-0 right-0 z-50 sheet-enter rounded-t-[20px] overflow-hidden"
-        style={{ background: "#f8f8f6", maxHeight: "85vh", overflowY: "auto", position: "relative" }}
+        className="sheet-enter"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "min(92vw, 400px)",
+          maxHeight: "85vh",
+          overflowY: "auto",
+          background: "#f8f8f6",
+          borderRadius: 20,
+          zIndex: 50,
+        }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">

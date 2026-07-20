@@ -3,7 +3,7 @@ import { playfair } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Le Mort · Flatlined.",
+  title: "Les Morts · Flatlined.",
   description: "Pay $1. We watch them. You get on with your life.",
 };
 
