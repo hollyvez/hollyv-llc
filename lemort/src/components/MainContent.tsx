@@ -9,11 +9,18 @@ import FollowSheet from "./FollowSheet";
 import ConfirmationScreen from "./ConfirmationScreen";
 import PrivatePersonForm, { type PrivateFormData } from "./PrivatePersonForm";
 import PrivateConfirmScreen from "./PrivateConfirmScreen";
+import AuthModal from "./AuthModal";
+import { useSession } from "@/lib/useSession";
+import { createClient } from "@/lib/supabase/client";
 
 type Tab = "following" | "leaderboard";
 type SearchPath = "famous" | "private";
 
 export default function MainContent() {
+  const { user, loading: sessionLoading } = useSession();
+  const [showAuth, setShowAuth] = useState(false);
+  const [pendingPerson, setPendingPerson] = useState<MockPerson | null>(null);
+
   const [tab, setTab] = useState<Tab>("following");
   const [searchPath, setSearchPath] = useState<SearchPath>("famous");
   const [query, setQuery] = useState("");
@@ -91,8 +98,27 @@ export default function MainContent() {
     ...followedPeople.filter((p) => p.status === "dead"),
   ];
 
+  // When user signs in after being prompted, open the sheet they wanted
+  useEffect(() => {
+    if (user && pendingPerson) {
+      setFollowSheet(pendingPerson);
+      setPendingPerson(null);
+      setShowAuth(false);
+    }
+  }, [user, pendingPerson]);
+
   const handleFollow = (person: MockPerson) => {
+    if (!user) {
+      setPendingPerson(person);
+      setShowAuth(true);
+      return;
+    }
     setFollowSheet(person);
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
   };
 
   const handleConfirm = (ids: string[]) => {
@@ -131,6 +157,32 @@ export default function MainContent() {
 
   return (
     <div className="max-w-md mx-auto px-4 pb-16">
+      {/* Auth bar */}
+      {!sessionLoading && (
+        <div className="flex justify-end mb-2">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs" style={{ color: "#999" }}>{user.email}</span>
+              <button
+                onClick={handleSignOut}
+                className="text-xs"
+                style={{ color: "#bbb" }}
+              >
+                sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowAuth(true)}
+              className="text-xs font-medium"
+              style={{ color: "#5a5850" }}
+            >
+              sign in
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Search bar */}
       <div className="mb-4">
         <div className="relative">
@@ -263,6 +315,11 @@ export default function MainContent() {
             <LeaderboardTab people={MOCK_PEOPLE} onSelect={handleFollow} />
           )}
         </>
+      )}
+
+      {/* Auth modal */}
+      {showAuth && (
+        <AuthModal onDismiss={() => { setShowAuth(false); setPendingPerson(null); }} />
       )}
 
       {/* Follow sheet */}
