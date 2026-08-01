@@ -124,7 +124,6 @@ export default function PaymentSheet({ personIds, email, onSuccess, onBack }: Pa
       options={{
         clientSecret,
         appearance: { theme: "stripe", variables: { fontFamily: "inherit" } },
-        defaultValues: email ? { billingDetails: { email } } : undefined,
       }}
     >
       <CheckoutForm prefillEmail={email} onSuccess={onSuccess} onBack={onBack} />

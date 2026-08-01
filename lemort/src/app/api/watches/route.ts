@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 
 export async function GET() {
+  try {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -36,4 +37,8 @@ export async function GET() {
 
   const personIds = dbUser.watches.map((w) => w.person.wikidataId ?? w.person.id);
   return NextResponse.json({ personIds });
+  } catch (err) {
+    console.error("[/api/watches]", err);
+    return NextResponse.json({ personIds: [] });
+  }
 }
