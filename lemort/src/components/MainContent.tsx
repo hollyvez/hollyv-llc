@@ -37,6 +37,19 @@ export default function MainContent() {
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Load watches from DB when user signs in
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/watches")
+      .then((r) => r.json())
+      .then((data: { personIds: string[] }) => {
+        if (data.personIds?.length) {
+          setFollowing((prev) => new Set([...prev, ...data.personIds]));
+        }
+      })
+      .catch(() => {});
+  }, [user?.id]);
+
   // Live search via Wikidata API
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -108,6 +121,7 @@ export default function MainContent() {
   }, [user, pendingPerson]);
 
   const handleFollow = (person: MockPerson) => {
+    if (sessionLoading) return; // wait for session to resolve
     if (!user) {
       setPendingPerson(person);
       setShowAuth(true);
