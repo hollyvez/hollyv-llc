@@ -9,6 +9,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ onDismiss }: AuthModalProps) {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export default function AuthModal({ onDismiss }: AuthModalProps) {
       email: email.trim(),
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: { phone: phone.trim() || null },
       },
     });
 
@@ -83,6 +85,19 @@ export default function AuthModal({ onDismiss }: AuthModalProps) {
                 className="w-full rounded-xl border border-[#e8e4dc] px-4 py-3 text-sm outline-none focus:border-[#5a5850] transition-colors"
                 style={{ color: "#1a1a14" }}
               />
+              <div>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Mobile number (optional)"
+                  className="w-full rounded-xl border border-[#e8e4dc] px-4 py-3 text-sm outline-none focus:border-[#5a5850] transition-colors"
+                  style={{ color: "#1a1a14" }}
+                />
+                <p className="text-xs mt-1.5 px-1" style={{ color: "#bbb" }}>
+                  If you add your number, we&rsquo;ll also text you when someone departs. By adding your number you agree to receive SMS death alerts.
+                </p>
+              </div>
               {error && (
                 <p className="text-xs" style={{ color: "#c0392b" }}>{error}</p>
               )}
