@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
       phone: phone ?? "",
     },
     receipt_email: email ?? undefined,
-    automatic_payment_methods: { enabled: true },
+    automatic_payment_methods: {
+      enabled: true,
+      allow_redirects: "never",
+    },
   });
 
   return NextResponse.json({ clientSecret: intent.client_secret });
