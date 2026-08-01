@@ -341,6 +341,7 @@ export default function MainContent() {
         <FollowSheet
           person={followSheet}
           following={following}
+          userEmail={user?.email ?? undefined}
           onConfirm={handleConfirm}
           onDismiss={() => setFollowSheet(null)}
         />

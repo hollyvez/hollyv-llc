@@ -10,6 +10,7 @@ import PaymentSheet from "./PaymentSheet";
 interface FollowSheetProps {
   person: MockPerson;
   following: Set<string>;
+  userEmail?: string;
   onConfirm: (ids: string[]) => void;
   onDismiss: () => void;
 }
@@ -39,7 +40,7 @@ function fireSparkles(originEl: HTMLElement, container: HTMLElement) {
   }
 }
 
-export default function FollowSheet({ person, following, onConfirm, onDismiss }: FollowSheetProps) {
+export default function FollowSheet({ person, following, userEmail, onConfirm, onDismiss }: FollowSheetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set([person.id]));
   const [showPayment, setShowPayment] = useState(false);
@@ -276,6 +277,7 @@ export default function FollowSheet({ person, following, onConfirm, onDismiss }:
               </p>
               <PaymentSheet
                 personIds={Array.from(selected).filter((id) => !following.has(id))}
+                email={userEmail}
                 onSuccess={handlePaymentSuccess}
                 onBack={() => setShowPayment(false)}
               />
