@@ -110,3 +110,52 @@ test.describe("follow sheet modal", () => {
     await expect(modal.getByPlaceholder("your@email.com")).toBeVisible({ timeout: 5000 });
   });
 });
+
+test.describe("auth", () => {
+  test("sign in button appears when signed out", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "sign in" })).toBeVisible();
+  });
+
+  test("clicking Watch while signed out shows auth modal", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Leaderboard" }).click();
+    await page.getByRole("button", { name: /Watch/i }).first().click();
+
+    // Should show auth modal, not follow sheet
+    const authModal = page.locator(".sheet-enter");
+    await expect(authModal).toBeVisible();
+    await expect(authModal.getByPlaceholder("your@email.com")).toBeVisible();
+    await expect(authModal.getByRole("button", { name: /Send magic link/i })).toBeVisible();
+  });
+
+  test("auth modal has optional phone field with consent copy", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "sign in" }).click();
+
+    const modal = page.locator(".sheet-enter");
+    await expect(modal.getByPlaceholder("Mobile number (optional)")).toBeVisible();
+    await expect(modal.getByText(/SMS death alerts/i)).toBeVisible();
+  });
+
+  test("auth modal dismisses on backdrop click", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "sign in" }).click();
+    await expect(page.locator(".sheet-enter")).toBeVisible();
+    await page.locator(".backdrop-enter").click({ force: true });
+    await expect(page.locator(".sheet-enter")).not.toBeVisible();
+  });
+
+  test("auth modal shows sent confirmation after submitting email", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "sign in" }).click();
+
+    const modal = page.locator(".sheet-enter");
+    await modal.getByPlaceholder("your@email.com").fill("test@example.com");
+    await modal.getByRole("button", { name: /Send magic link/i }).click();
+
+    // Should show "Check your inbox" confirmation
+    await expect(modal.getByText(/Check your inbox/i)).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText("test@example.com")).toBeVisible();
+  });
+});
