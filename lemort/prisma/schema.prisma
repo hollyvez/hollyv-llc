@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  phone     String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  supabaseId String?  @unique  // auth.users.id from Supabase
+  email      String   @unique
+  phone      String?
+  createdAt  DateTime @default(now())
 
   watches Watch[]
+
+  @@index([supabaseId])
 }
 
 model Person {

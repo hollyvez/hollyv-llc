@@ -8,14 +8,15 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 interface PaymentSheetProps {
   personIds: string[];
+  email?: string;
   onSuccess: () => void;
   onBack: () => void;
 }
 
-function CheckoutForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
+function CheckoutForm({ prefillEmail, onSuccess, onBack }: { prefillEmail?: string; onSuccess: () => void; onBack: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(prefillEmail ?? "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -45,15 +46,17 @@ function CheckoutForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="your@email.com"
-        required
-        className="w-full rounded-xl border border-[#e8e4dc] px-4 py-3 text-sm outline-none focus:border-[#5a5850] transition-colors"
-        style={{ color: "#1a1a14" }}
-      />
+      {!prefillEmail && (
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          required
+          className="w-full rounded-xl border border-[#e8e4dc] px-4 py-3 text-sm outline-none focus:border-[#5a5850] transition-colors"
+          style={{ color: "#1a1a14" }}
+        />
+      )}
       <PaymentElement />
       {error && <p className="text-sm" style={{ color: "#c0392b" }}>{error}</p>}
       <button
@@ -80,7 +83,7 @@ function CheckoutForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
   );
 }
 
-export default function PaymentSheet({ personIds, onSuccess, onBack }: PaymentSheetProps) {
+export default function PaymentSheet({ personIds, email, onSuccess, onBack }: PaymentSheetProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -118,9 +121,13 @@ export default function PaymentSheet({ personIds, onSuccess, onBack }: PaymentSh
   return (
     <Elements
       stripe={stripePromise}
-      options={{ clientSecret, appearance: { theme: "stripe", variables: { fontFamily: "inherit" } } }}
+      options={{
+        clientSecret,
+        appearance: { theme: "stripe", variables: { fontFamily: "inherit" } },
+        paymentMethodOrder: ["card", "apple_pay", "google_pay"],
+      }}
     >
-      <CheckoutForm onSuccess={onSuccess} onBack={onBack} />
+      <CheckoutForm prefillEmail={email} onSuccess={onSuccess} onBack={onBack} />
     </Elements>
   );
 }

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { personIds, email, channel, phone } = body as {
+  const { personIds, channel, phone } = body as {
     personIds: string[];
-    email?: string;
     channel?: "email" | "sms";
     phone?: string;
   };
@@ -20,10 +20,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
   }
 
+  // Get email from session
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const email = user?.email;
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   const intent = await stripe.paymentIntents.create({
-    amount: personIds.length * 100, // $1 per person
+    amount: personIds.length * 100,
     currency: "usd",
     metadata: {
       personIds: personIds.join(","),
@@ -32,7 +37,10 @@ export async function POST(req: NextRequest) {
       phone: phone ?? "",
     },
     receipt_email: email ?? undefined,
-    automatic_payment_methods: { enabled: true },
+    automatic_payment_methods: {
+      enabled: true,
+      allow_redirects: "never",
+    },
   });
 
   return NextResponse.json({ clientSecret: intent.client_secret });
