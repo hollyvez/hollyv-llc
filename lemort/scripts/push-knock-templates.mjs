@@ -5,7 +5,7 @@
  *   node scripts/push-knock-templates.mjs [--env development|production]
  *
  * Requires:
- *   KNOCK_SERVICE_TOKEN  — Knock service token (Settings > Service tokens)
+ *   KNOCK_MGMT_TOKEN  — Knock service token (Settings > Service tokens)
  */
 
 import fs from "fs";
@@ -24,9 +24,7 @@ if (!SERVICE_TOKEN) {
   process.exit(1);
 }
 
-const APP_ID = "lesmorts";
-const BASE = `https://control.knock.app/v1`;
-
+const BASE = "https://control.knock.app/v1";
 const headers = {
   Authorization: `Bearer ${SERVICE_TOKEN}`,
   "Content-Type": "application/json",
@@ -39,22 +37,44 @@ async function api(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`${method} ${path} → ${res.status}: ${text}`);
-  }
+  if (!res.ok) throw new Error(`${method} ${path} → ${res.status}: ${text}`);
   return text ? JSON.parse(text) : null;
 }
 
 function readTemplate(filename) {
-  return fs.readFileSync(path.join(__dirname, "../email-templates", filename), "utf8");
+  return fs.readFileSync(
+    path.join(__dirname, "../email-templates", filename),
+    "utf8"
+  );
 }
 
-const deathHtml = readTemplate("death-notification.html");
-const followHtml = readTemplate("follow-confirmation.html");
+// Convert our {{foo}} placeholders to Knock liquid {{ data.foo }}
+function toKnock(html, varMap) {
+  let out = html;
+  for (const [from, to] of Object.entries(varMap)) {
+    out = out.replaceAll(`{{${from}}}`, `{{ ${to} }}`);
+  }
+  return out;
+}
 
-// Knock liquid-style variable mapping:
-// Our {{foo}} → Knock uses {{ foo }} (liquid) — they're compatible
-// Subject lines use liquid too
+const deathHtml = toKnock(readTemplate("death-notification.html"), {
+  subjectName: "data.subjectName",
+  age: "data.age",
+  deathQuip: "data.deathQuip",
+  departedDate: "data.departedDate",
+  source: "data.source",
+  photoUrl: "data.photoUrl",
+  unsubscribeUrl: "recipient.unsubscribe_url",
+});
+
+const followHtml = toKnock(readTemplate("follow-confirmation.html"), {
+  subjectName: "data.subjectName",
+  age: "data.age",
+  quip: "data.quip",
+  watcherCount: "data.watcherCount",
+  photoUrl: "data.photoUrl",
+  unsubscribeUrl: "recipient.unsubscribe_url",
+});
 
 const workflows = [
   {
@@ -62,18 +82,17 @@ const workflows = [
     name: "Death Alert Email",
     steps: [
       {
+        ref: "email_1",
         type: "channel",
         channel_type: "email",
-        settings: {
-          subject: "{{ subjectName }} has flatlined.",
-          html_body: deathHtml
-            .replace(/{{subjectName}}/g, "{{ subjectName }}")
-            .replace(/{{age}}/g, "{{ age }}")
-            .replace(/{{deathQuip}}/g, "{{ deathQuip }}")
-            .replace(/{{departedDate}}/g, "{{ departedDate }}")
-            .replace(/{{source}}/g, "{{ source }}")
-            .replace(/{{photoUrl}}/g, "{{ photoUrl }}")
-            .replace(/{{unsubscribeUrl}}/g, "{{ unsubscribeUrl }}"),
+        channel_key: "knock-email",
+        name: "Death Alert",
+        template: {
+          subject: "{{ data.subjectName }} has flatlined.",
+          preview_text: "Your dollar has matured.",
+          html_body: deathHtml,
+          is_mjml: false,
+          settings: { layout_key: "default" },
         },
       },
     ],
@@ -83,10 +102,13 @@ const workflows = [
     name: "SMS Death Alert",
     steps: [
       {
+        ref: "sms_1",
         type: "channel",
         channel_type: "sms",
-        settings: {
-          text: "Les Morts: {{ name }} has departed, age {{ age }}. You knew before almost everyone. That was the deal. Your watchlist has an opening: lesmorts.org",
+        channel_key: "twilio",
+        name: "SMS Death Alert",
+        template: {
+          text: "Les Morts: {{ data.subjectName }} has departed, age {{ data.age }}. You knew before almost everyone. That was the deal. Your watchlist has an opening: lesmorts.org",
         },
       },
     ],
@@ -96,17 +118,17 @@ const workflows = [
     name: "Follow Confirmation",
     steps: [
       {
+        ref: "email_1",
         type: "channel",
         channel_type: "email",
-        settings: {
-          subject: "You're watching {{ subjectName }}.",
-          html_body: followHtml
-            .replace(/{{subjectName}}/g, "{{ subjectName }}")
-            .replace(/{{age}}/g, "{{ age }}")
-            .replace(/{{quip}}/g, "{{ quip }}")
-            .replace(/{{watcherCount}}/g, "{{ watcherCount }}")
-            .replace(/{{photoUrl}}/g, "{{ photoUrl }}")
-            .replace(/{{unsubscribeUrl}}/g, "{{ unsubscribeUrl }}"),
+        channel_key: "knock-email",
+        name: "Follow Confirmation",
+        template: {
+          subject: "You're watching {{ data.subjectName }}.",
+          preview_text: "Nothing to do now. That's the point.",
+          html_body: followHtml,
+          is_mjml: false,
+          settings: { layout_key: "default" },
         },
       },
     ],
@@ -116,8 +138,7 @@ const workflows = [
 async function pushWorkflow(wf) {
   console.log(`\n→ Pushing workflow: ${wf.key}`);
   try {
-    // Upsert the workflow
-    await api("PUT", `/environments/${ENV}/workflows/${wf.key}`, {
+    await api("PUT", `/workflows/${wf.key}`, {
       name: wf.name,
       steps: wf.steps,
     });
@@ -127,8 +148,22 @@ async function pushWorkflow(wf) {
   }
 }
 
-console.log(`\nPushing Knock templates to environment: ${ENV}`);
+// Promote to target environment after pushing
+async function promoteToEnv() {
+  if (ENV === "development") return; // dev is default, no promote needed
+  console.log(`\n→ Promoting to ${ENV}...`);
+  try {
+    await api("PUT", `/environments/${ENV}/promote`, {});
+    console.log(`  ✓ promoted to ${ENV}`);
+  } catch (err) {
+    console.error(`  ✗ promote failed: ${err.message}`);
+  }
+}
+
+console.log(`\nPushing Knock templates (will appear in Development first)`);
 for (const wf of workflows) {
   await pushWorkflow(wf);
 }
+
+await promoteToEnv();
 console.log("\nDone.");
