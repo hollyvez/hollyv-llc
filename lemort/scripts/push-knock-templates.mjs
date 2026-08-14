@@ -105,10 +105,9 @@ const workflows = [
         ref: "sms_1",
         type: "channel",
         channel_type: "sms",
-        channel_key: "twilio",
         name: "SMS Death Alert",
         template: {
-          text: "Les Morts: {{ data.subjectName }} has departed, age {{ data.age }}. You knew before almost everyone. That was the deal. Your watchlist has an opening: lesmorts.org",
+          text_body: "Les Morts: {{ data.subjectName }} has departed, age {{ data.age }}. You knew before almost everyone. That was the deal. Your watchlist has an opening: lesmorts.org",
         },
       },
     ],
