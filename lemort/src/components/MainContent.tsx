@@ -44,7 +44,7 @@ export default function MainContent() {
       .then((r) => r.json())
       .then((data: { personIds: string[] }) => {
         if (data.personIds?.length) {
-          setFollowing((prev) => new Set([...prev, ...data.personIds]));
+          setFollowing((prev) => new Set(Array.from(prev).concat(data.personIds)));
         }
       })
       .catch(() => {});
