@@ -134,37 +134,26 @@ const workflows = [
   },
 ];
 
-async function pushWorkflow(wf) {
-  console.log(`\n→ Pushing workflow: ${wf.key}`);
+async function pushWorkflow(wf, env) {
+  const envSuffix = env ? `?environment=${env}` : "";
+  const label = `${wf.key}${env ? ` (${env})` : ""}`;
+  console.log(`\n→ Pushing workflow: ${label}`);
   try {
-    await api("PUT", `/workflows/${wf.key}`, {
-      workflow: {
-        name: wf.name,
-        steps: wf.steps,
-      },
+    await api("PUT", `/workflows/${wf.key}${envSuffix}`, {
+      workflow: { name: wf.name, steps: wf.steps },
     });
-    console.log(`  ✓ ${wf.key} pushed`);
+    console.log(`  ✓ ${label} pushed`);
   } catch (err) {
-    console.error(`  ✗ ${wf.key} failed: ${err.message}`);
+    console.error(`  ✗ ${label} failed: ${err.message}`);
   }
 }
 
-// Promote to target environment after pushing
-async function promoteToEnv() {
-  if (ENV === "development") return; // dev is default, no promote needed
-  console.log(`\n→ Promoting to ${ENV}...`);
-  try {
-    await api("PUT", `/environments/${ENV}/promote`, {});
-    console.log(`  ✓ promoted to ${ENV}`);
-  } catch (err) {
-    console.error(`  ✗ promote failed: ${err.message}`);
+const environments = ENV === "production" ? ["development", "production"] : ["development"];
+
+console.log(`\nPushing Knock templates to: ${environments.join(", ")}`);
+for (const env of environments) {
+  for (const wf of workflows) {
+    await pushWorkflow(wf, env);
   }
 }
-
-console.log(`\nPushing Knock templates (will appear in Development first)`);
-for (const wf of workflows) {
-  await pushWorkflow(wf);
-}
-
-await promoteToEnv();
 console.log("\nDone.");
