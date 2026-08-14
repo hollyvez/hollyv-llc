@@ -139,8 +139,10 @@ async function pushWorkflow(wf) {
   console.log(`\n→ Pushing workflow: ${wf.key}`);
   try {
     await api("PUT", `/workflows/${wf.key}`, {
-      name: wf.name,
-      steps: wf.steps,
+      workflow: {
+        name: wf.name,
+        steps: wf.steps,
+      },
     });
     console.log(`  ✓ ${wf.key} pushed`);
   } catch (err) {
