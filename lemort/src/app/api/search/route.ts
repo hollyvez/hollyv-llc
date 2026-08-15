@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,10 @@ async function wbPost(params: Record<string, string>, retries = 2): Promise<Reco
 }
 
 export async function GET(req: NextRequest) {
+  if (!rateLimit(`search:${getIp(req)}`, 20, 60_000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length < 3) {
     return NextResponse.json({ error: "Query param `q` must be at least 3 characters" }, { status: 400 });
