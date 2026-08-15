@@ -10,7 +10,7 @@ export const maxDuration = 60;
 /**
  * GET /api/cron
  *
- * Intended to be called by a cron service (e.g. Vercel Cron, GitHub Actions).
+ * Called by GitHub Actions on a schedule.
  * Protect with a shared secret in the Authorization header:
  *   Authorization: Bearer <CRON_SECRET>
  */
@@ -36,12 +36,11 @@ export async function GET(req: NextRequest) {
 interface CronSummary {
   checkedDeaths: number;
   newlyMarked: number;
-  watchersToNotify: number;
+  watchersNotified: number;
 }
 
 async function pollAndMarkDeaths(): Promise<CronSummary> {
-  // Fetch deaths for the current month (and the previous month to catch
-  // late additions to Wikipedia).
+  // Fetch deaths for the current month and previous month (catches late Wikipedia edits)
   const now = new Date();
   const [currentDeaths, prevDeaths] = await Promise.all([
     fetchMonthlyDeaths(now.getUTCFullYear(), now.getUTCMonth() + 1),
@@ -57,10 +56,10 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
     .filter((id): id is string => id !== null);
 
   if (wikidataIds.length === 0) {
-    return { checkedDeaths: 0, newlyMarked: 0, watchersToNotify: 0 };
+    return { checkedDeaths: 0, newlyMarked: 0, watchersNotified: 0 };
   }
 
-  // Find watched Person records that match a death and aren't yet marked.
+  // Find watched Person records that match a death and aren't yet marked deceased
   const watchedPersons = await prisma.person.findMany({
     where: {
       wikidataId: { in: wikidataIds },
@@ -68,13 +67,16 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
     },
     include: {
       watches: {
-        include: { user: true },
+        include: {
+          user: true,
+          notifications: { where: { channel: "email" } },
+        },
       },
     },
   });
 
   let newlyMarked = 0;
-  let watchersToNotify = 0;
+  let watchersNotified = 0;
 
   for (const person of watchedPersons) {
     const deathRecord = allDeaths.find((d) => d.wikidataId === person.wikidataId);
@@ -90,32 +92,64 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
     });
 
     newlyMarked++;
-    watchersToNotify += person.watches.length;
+
+    // Only notify watches that haven't already received an email notification
+    const unwatches = person.watches.filter((w) => w.notifications.length === 0);
 
     console.log(
       `[cron] Marked ${person.name} (${person.wikidataId}) deceased on ${deathRecord.diedAt.toISOString()}. ` +
-        `${person.watches.length} watcher(s) to notify.`
+        `${unwatches.length} watcher(s) to notify.`
     );
 
-    // Notify each watcher via Knock
-    if (process.env.KNOCK_SECRET_KEY && person.watches.length > 0) {
-      const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
+    if (process.env.KNOCK_SECRET_KEY && unwatches.length > 0) {
+      const knock = new Knock(process.env.KNOCK_SECRET_KEY);
+
+      const age = person.dob
+        ? Math.floor(
+            (deathRecord.diedAt.getTime() - new Date(person.dob).getTime()) /
+              31557600000
+          )
+        : null;
+
+      const departedDate = deathRecord.diedAt.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+
       await knock.workflows.trigger("death-alert-email", {
-        recipients: person.watches.map((w) => ({
+        recipients: unwatches.map((w) => ({
           id: w.user.id,
           email: w.user.email,
         })),
         data: {
-          person_name: person.name,
-          died_on: deathRecord.diedAt.toISOString().split("T")[0],
+          subjectName: person.name,
+          age,
+          deathQuip: "a good run",
+          departedDate,
+          source: "Wikipedia",
+          photoUrl: person.photo ?? "",
+          unsubscribeUrl: "", // Knock fills recipient.unsubscribe_url via template
         },
       });
+
+      // Record notifications to prevent double-sending
+      await prisma.notification.createMany({
+        data: unwatches.map((w) => ({
+          watchId: w.id,
+          channel: "email",
+        })),
+        skipDuplicates: true,
+      });
+
+      watchersNotified += unwatches.length;
     }
   }
 
   return {
     checkedDeaths: allDeaths.length,
     newlyMarked,
-    watchersToNotify,
+    watchersNotified,
   };
 }

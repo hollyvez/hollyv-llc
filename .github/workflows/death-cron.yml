@@ -1,0 +1,22 @@
+name: Death Alert Cron
+
+on:
+  schedule:
+    # Run daily at 08:00 UTC
+    - cron: "0 8 * * *"
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  poll-deaths:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poll deaths and notify watchers
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://lesmorts.org/api/cron)
+          echo "Response code: $response"
+          if [ "$response" != "200" ]; then
+            echo "Cron job failed with status $response"
+            exit 1
+          fi
