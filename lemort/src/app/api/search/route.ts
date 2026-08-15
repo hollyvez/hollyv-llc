@@ -35,7 +35,7 @@ async function wbPost(params: Record<string, string>, retries = 2): Promise<Reco
 }
 
 export async function GET(req: NextRequest) {
-  if (!rateLimit(`search:${getIp(req)}`, 20, 60_000)) {
+  if (process.env.NODE_ENV !== "test" && !rateLimit(`search:${getIp(req)}`, 20, 60_000)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
