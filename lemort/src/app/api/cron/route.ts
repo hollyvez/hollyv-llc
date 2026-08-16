@@ -118,28 +118,43 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
         timeZone: "UTC",
       });
 
+      const knockData = {
+        subjectName: person.name,
+        age,
+        deathQuip: "a good run",
+        departedDate,
+        source: "Wikipedia",
+        photoUrl: person.photo ?? "",
+      };
+
+      // Email all watchers
       await knock.workflows.trigger("death-alert-email", {
         recipients: unwatches.map((w) => ({
           id: w.user.id,
           email: w.user.email,
         })),
-        data: {
-          subjectName: person.name,
-          age,
-          deathQuip: "a good run",
-          departedDate,
-          source: "Wikipedia",
-          photoUrl: person.photo ?? "",
-          unsubscribeUrl: "", // Knock fills recipient.unsubscribe_url via template
-        },
+        data: knockData,
       });
 
+      // SMS watchers who provided a phone number
+      const smsWatches = unwatches.filter((w) => w.user.phone);
+      if (smsWatches.length > 0) {
+        await knock.workflows.trigger("sms-death-alert", {
+          recipients: smsWatches.map((w) => ({
+            id: w.user.id,
+            phone_number: w.user.phone!,
+          })),
+          data: knockData,
+        });
+      }
+
       // Record notifications to prevent double-sending
+      const notificationRows = unwatches.map((w) => ({ watchId: w.id, channel: "email" }));
+      if (smsWatches.length > 0) {
+        notificationRows.push(...smsWatches.map((w) => ({ watchId: w.id, channel: "sms" })));
+      }
       await prisma.notification.createMany({
-        data: unwatches.map((w) => ({
-          watchId: w.id,
-          channel: "email",
-        })),
+        data: notificationRows,
         skipDuplicates: true,
       });
 
