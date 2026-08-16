@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       list: "search",
       srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
       srnamespace: "0",
-      srlimit: "30", // Fetch more; we sort by notability and return top 8
+      srlimit: "15", // Fetch more than 8; sort by notability, return top 8
     });
     const hits: { title: string }[] = (searchData.query as { search?: { title: string }[] })?.search ?? [];
     const ids = hits.map((h) => h.title);
