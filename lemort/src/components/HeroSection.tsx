@@ -2,7 +2,7 @@ export default function HeroSection() {
   return (
     <header className="pt-12 pb-8 px-5 text-center">
       {/* Logo lockup */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-3 items-center mb-1">
+      <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-3 items-center justify-center mb-1">
         <h1
           className="text-5xl font-playfair"
           style={{ fontStyle: "italic", fontWeight: 700, color: "#1a1a14" }}
