@@ -16,9 +16,9 @@ const buckets = new Map<string, Bucket>();
 // Prune stale buckets every 5 minutes to prevent memory growth
 setInterval(() => {
   const now = Date.now();
-  for (const [key, bucket] of buckets) {
+  buckets.forEach((bucket, key) => {
     if (now > bucket.resetAt) buckets.delete(key);
-  }
+  });
 }, 5 * 60 * 1000);
 
 /**
