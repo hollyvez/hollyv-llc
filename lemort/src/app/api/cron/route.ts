@@ -102,7 +102,7 @@ async function pollAndMarkDeaths(): Promise<CronSummary> {
     );
 
     if (process.env.KNOCK_SECRET_KEY && unwatches.length > 0) {
-      const knock = new Knock(process.env.KNOCK_SECRET_KEY);
+      const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
 
       const age = person.dob
         ? Math.floor(

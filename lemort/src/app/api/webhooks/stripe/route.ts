@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     // Send follow confirmation via Knock
     if (process.env.KNOCK_SECRET_KEY) {
       try {
-        const knock = new Knock(process.env.KNOCK_SECRET_KEY);
+        const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
 
         // Look up person details for the first person (confirmation email shows one)
         const firstPerson = await prisma.person.findUnique({
