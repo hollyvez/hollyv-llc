@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       list: "search",
       srsearch: `${q} haswbstatement:P31=Q5 -haswbstatement:P570`,
       srnamespace: "0",
-      srlimit: "8",
+      srlimit: "30", // Fetch more; we sort by notability and return top 8
     });
     const hits: { title: string }[] = (searchData.query as { search?: { title: string }[] })?.search ?? [];
     const ids = hits.map((h) => h.title);
@@ -69,13 +69,14 @@ export async function GET(req: NextRequest) {
 
     const [claimsData, labelsData] = await Promise.all([
       wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "claims" }),
-      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "labels|sitelinks", languages: "en", sitefilter: "enwiki" }),
+      // sitelinks (all, not just enwiki) — used as notability proxy
+      wbPost({ action: "wbgetentities", ids: ids.join("|"), props: "labels|sitelinks", languages: "en" }),
     ]);
 
     const claimsEntities = (claimsData.entities ?? {}) as Record<string, { missing?: boolean; claims?: Record<string, unknown[]>; labels?: unknown; sitelinks?: unknown }>;
-    const labelEntities = (labelsData.entities ?? {}) as Record<string, { labels?: { en?: { value?: string } }; sitelinks?: { enwiki?: { title?: string } } }>;
+    const labelEntities = (labelsData.entities ?? {}) as Record<string, { labels?: { en?: { value?: string } }; sitelinks?: Record<string, unknown> }>;
 
-    type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; gender: "man" | "woman"; occQid: string | null; natQid: string | null };
+    type Raw = { wikidataId: string; name: string; dateOfBirth: string | null; photo: string | null; gender: "man" | "woman"; occQid: string | null; natQid: string | null; sitelinkCount: number };
     const raw: Raw[] = [];
 
     for (const id of ids) {
@@ -88,8 +89,9 @@ export async function GET(req: NextRequest) {
       const occQid: string | null = (ec.claims?.P106 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
       const natQid: string | null = (ec.claims?.P27 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
       const genderQid: string | null = (ec.claims?.P21 as { mainsnak?: { datavalue?: { value?: { id?: string } } } }[])?.[0]?.mainsnak?.datavalue?.value?.id ?? null;
-      const sitelinkTitle = el?.sitelinks?.enwiki?.title;
-      const name: string = el?.labels?.en?.value ?? sitelinkTitle ?? id;
+      const sitelinkCount = el?.sitelinks ? Object.keys(el.sitelinks).length : 0;
+      const enwikiTitle = (el?.sitelinks?.enwiki as { title?: string } | undefined)?.title;
+      const name: string = el?.labels?.en?.value ?? enwikiTitle ?? id;
 
       raw.push({
         wikidataId: id,
@@ -99,6 +101,7 @@ export async function GET(req: NextRequest) {
         gender: genderQid === "Q6581072" ? "woman" : "man",
         occQid,
         natQid,
+        sitelinkCount,
       });
     }
 
@@ -107,7 +110,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ results: [] });
     }
 
-    const qids = Array.from(new Set(raw.flatMap((r) => [r.occQid, r.natQid].filter(Boolean) as string[])));
+    // Sort by notability (sitelink count descending), keep top 8
+    raw.sort((a, b) => b.sitelinkCount - a.sitelinkCount);
+    const top = raw.slice(0, 8);
+
+    const qids = Array.from(new Set(top.flatMap((r) => [r.occQid, r.natQid].filter(Boolean) as string[])));
     const labelMap: Record<string, string> = {};
     if (qids.length > 0) {
       const ld = await wbPost({ action: "wbgetentities", ids: qids.join("|"), props: "labels", languages: "en" });
@@ -116,7 +123,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const results = raw.map((r) => ({
+    const results = top.map((r) => ({
       wikidataId: r.wikidataId,
       name: r.name,
       dateOfBirth: r.dateOfBirth,
