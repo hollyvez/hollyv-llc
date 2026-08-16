@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
@@ -11,8 +12,9 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { personIds, channel, phone } = body as {
+  const { personIds, persons, channel, phone } = body as {
     personIds: string[];
+    persons?: { wikidataId: string; name: string; photo: string | null }[];
     channel?: "email" | "sms";
     phone?: string;
   };
@@ -30,13 +32,31 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const email = user?.email;
 
+  // Upsert Person records so the webhook can find them by wikidataId.
+  // persons array is provided by the client with wikidataId, name, photo.
+  const wikidataIds: string[] = [];
+  if (persons && persons.length > 0) {
+    for (const p of persons) {
+      if (!p.wikidataId) continue;
+      await prisma.person.upsert({
+        where: { wikidataId: p.wikidataId },
+        create: { wikidataId: p.wikidataId, name: p.name, photo: p.photo ?? null },
+        update: { name: p.name, photo: p.photo ?? null },
+      }).catch(() => {});
+      wikidataIds.push(p.wikidataId);
+    }
+  }
+
+  // Fall back to raw personIds if no wikidataIds resolved (shouldn't happen in practice)
+  const metaIds = wikidataIds.length > 0 ? wikidataIds : personIds;
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   const intent = await stripe.paymentIntents.create({
-    amount: personIds.length * 100,
+    amount: metaIds.length * 100,
     currency: "usd",
     metadata: {
-      personIds: personIds.join(","),
+      personIds: metaIds.join(","),
       email: email ?? "",
       channel: channel ?? "email",
       phone: phone ?? "",

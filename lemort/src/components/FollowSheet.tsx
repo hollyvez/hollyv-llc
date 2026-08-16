@@ -277,6 +277,7 @@ export default function FollowSheet({ person, following, userEmail, onConfirm, o
               </p>
               <PaymentSheet
                 personIds={Array.from(selected).filter((id) => !following.has(id))}
+                persons={basketPeople}
                 email={userEmail}
                 onSuccess={handlePaymentSuccess}
                 onBack={() => setShowPayment(false)}

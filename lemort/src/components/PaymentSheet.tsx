@@ -6,8 +6,15 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+interface PersonData {
+  wikidataId: string;
+  name: string;
+  photo: string | null;
+}
+
 interface PaymentSheetProps {
   personIds: string[];
+  persons?: PersonData[];
   email?: string;
   onSuccess: () => void;
   onBack: () => void;
@@ -83,7 +90,7 @@ function CheckoutForm({ prefillEmail, onSuccess, onBack }: { prefillEmail?: stri
   );
 }
 
-export default function PaymentSheet({ personIds, email, onSuccess, onBack }: PaymentSheetProps) {
+export default function PaymentSheet({ personIds, persons, email, onSuccess, onBack }: PaymentSheetProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -91,7 +98,7 @@ export default function PaymentSheet({ personIds, email, onSuccess, onBack }: Pa
     fetch("/api/watch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ personIds }),
+      body: JSON.stringify({ personIds, persons }),
     })
       .then((r) => r.json())
       .then((d) => {
