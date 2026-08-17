@@ -36,7 +36,16 @@ export async function GET() {
   }
 
   const personIds = dbUser.watches.map((w) => w.person.wikidataId ?? w.person.id);
-  return NextResponse.json({ personIds });
+  const persons = dbUser.watches.map((w) => ({
+    wikidataId: w.person.wikidataId,
+    name: w.person.name,
+    photo: w.person.photo ?? null,
+    gender: (w.person.gender ?? "man") as "man" | "woman",
+    watcherCount: w.person.watcherCount,
+    isDeceased: w.person.isDeceased,
+    diedAt: w.person.diedAt ? w.person.diedAt.toISOString().split("T")[0] : null,
+  }));
+  return NextResponse.json({ personIds, persons });
   } catch (err) {
     console.error("[/api/watches]", err);
     return NextResponse.json({ personIds: [] });

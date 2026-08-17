@@ -42,9 +42,42 @@ export default function MainContent() {
     if (!user) return;
     fetch("/api/watches")
       .then((r) => r.json())
-      .then((data: { personIds: string[] }) => {
+      .then((data: {
+        personIds: string[];
+        persons?: {
+          wikidataId: string; name: string; photo: string | null;
+          gender: "man" | "woman"; watcherCount: number;
+          isDeceased: boolean; diedAt: string | null;
+        }[];
+      }) => {
         if (data.personIds?.length) {
           setFollowing((prev) => new Set(Array.from(prev).concat(data.personIds)));
+        }
+        if (data.persons?.length) {
+          setWatchedReal((prev) => {
+            const existingIds = new Set(prev.map((p) => p.id));
+            const incoming = data.persons!
+              .filter((p) => !existingIds.has(p.wikidataId))
+              .map((p) => ({
+                id: p.wikidataId,
+                wikidataId: p.wikidataId,
+                name: p.name,
+                photo: p.photo,
+                gender: p.gender,
+                watcherCount: p.watcherCount,
+                status: (p.isDeceased ? "dead" : "alive") as "alive" | "dead",
+                diedAt: p.diedAt,
+                age: 0,
+                occupation: "Public figure",
+                nationality: "",
+                isPrivate: false,
+                notified: false,
+                followedAt: "",
+                group: "",
+                groupSuggestions: [],
+              }));
+            return [...prev, ...incoming];
+          });
         }
       })
       .catch(() => {});
