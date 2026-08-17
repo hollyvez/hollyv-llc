@@ -14,7 +14,7 @@ import { useSession } from "@/lib/useSession";
 import { createClient } from "@/lib/supabase/client";
 
 function calcAge(dob: string): number {
-  const d = new Date(dob);
+  const d = new Date(dob.replace(" ", "T"));
   const now = new Date();
   let age = now.getFullYear() - d.getFullYear();
   if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
