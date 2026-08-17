@@ -13,6 +13,14 @@ import AuthModal from "./AuthModal";
 import { useSession } from "@/lib/useSession";
 import { createClient } from "@/lib/supabase/client";
 
+function calcAge(dob: string): number {
+  const d = new Date(dob);
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+  return age;
+}
+
 type Tab = "following" | "leaderboard";
 type SearchPath = "famous" | "private";
 
@@ -47,7 +55,7 @@ export default function MainContent() {
         persons?: {
           wikidataId: string; name: string; photo: string | null;
           gender: "man" | "woman"; watcherCount: number;
-          isDeceased: boolean; diedAt: string | null;
+          isDeceased: boolean; dob: string | null; diedAt: string | null;
         }[];
       }) => {
         if (data.personIds?.length) {
@@ -67,7 +75,7 @@ export default function MainContent() {
                 watcherCount: p.watcherCount,
                 status: (p.isDeceased ? "dead" : "alive") as "alive" | "dead",
                 diedAt: p.diedAt,
-                age: 0,
+                age: p.dob ? calcAge(p.dob) : 0,
                 occupation: "Public figure",
                 nationality: "",
                 isPrivate: false,

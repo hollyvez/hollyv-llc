@@ -43,6 +43,7 @@ export async function GET() {
     gender: (w.person.gender ?? "man") as "man" | "woman",
     watcherCount: w.person.watcherCount,
     isDeceased: w.person.isDeceased,
+    dob: w.person.dob ? w.person.dob.toISOString().split("T")[0] : null,
     diedAt: w.person.diedAt ? w.person.diedAt.toISOString().split("T")[0] : null,
   }));
   return NextResponse.json({ personIds, persons });
