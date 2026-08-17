@@ -10,6 +10,7 @@ interface PersonData {
   wikidataId: string;
   name: string;
   photo: string | null;
+  dateOfBirth?: string | null;
 }
 
 interface PaymentSheetProps {
@@ -98,7 +99,15 @@ export default function PaymentSheet({ personIds, persons, email, onSuccess, onB
     fetch("/api/watch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ personIds, persons }),
+      body: JSON.stringify({
+        personIds,
+        persons: persons?.map((p) => ({
+          wikidataId: p.wikidataId,
+          name: p.name,
+          photo: p.photo,
+          dateOfBirth: p.dateOfBirth ?? null,
+        })),
+      }),
     })
       .then((r) => r.json())
       .then((d) => {

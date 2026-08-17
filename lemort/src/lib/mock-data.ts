@@ -17,6 +17,7 @@ export interface MockPerson {
   wikidataId: string;
   group: string;
   groupSuggestions: string[];
+  dateOfBirth?: string | null;
 }
 
 export const MOCK_PEOPLE: MockPerson[] = [

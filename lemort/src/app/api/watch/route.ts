@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { personIds, persons, channel, phone } = body as {
     personIds: string[];
-    persons?: { wikidataId: string; name: string; photo: string | null }[];
+    persons?: { wikidataId: string; name: string; photo: string | null; dateOfBirth?: string | null }[];
     channel?: "email" | "sms";
     phone?: string;
   };
@@ -38,10 +38,11 @@ export async function POST(req: NextRequest) {
   if (persons && persons.length > 0) {
     for (const p of persons) {
       if (!p.wikidataId) continue;
+      const dob = p.dateOfBirth ? new Date(p.dateOfBirth) : null;
       await prisma.person.upsert({
         where: { wikidataId: p.wikidataId },
-        create: { wikidataId: p.wikidataId, name: p.name, photo: p.photo ?? null },
-        update: { name: p.name, photo: p.photo ?? null },
+        create: { wikidataId: p.wikidataId, name: p.name, photo: p.photo ?? null, dob },
+        update: { name: p.name, photo: p.photo ?? null, ...(dob ? { dob } : {}) },
       }).catch(() => {});
       wikidataIds.push(p.wikidataId);
     }

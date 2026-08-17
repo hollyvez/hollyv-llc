@@ -68,7 +68,9 @@ export default function FollowSheet({ person, following, userEmail, onConfirm, o
   const newCount = newIds.filter((id) => !following.has(id)).length;
   // For basket: count only truly new (not already paid for)
   const basketCount = Array.from(selected).filter((id) => !following.has(id)).length;
-  const basketPeople = MOCK_PEOPLE.filter((p) => selected.has(p.id) && !following.has(p.id));
+  // Include the primary person + any MOCK_PEOPLE group members that are selected
+  const allSelectable = [person, ...MOCK_PEOPLE.filter((p) => p.id !== person.id)];
+  const basketPeople = allSelectable.filter((p) => selected.has(p.id) && !following.has(p.id));
 
   const handleCta = () => {
     setShowPayment(true);

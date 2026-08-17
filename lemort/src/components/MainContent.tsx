@@ -91,6 +91,7 @@ export default function MainContent() {
             notified: false,
             followedAt: "",
             wikidataId: r.wikidataId,
+            dateOfBirth: r.dateOfBirth ?? null,
             group: "",
             groupSuggestions: [],
           })
