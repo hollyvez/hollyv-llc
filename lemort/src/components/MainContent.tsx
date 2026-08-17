@@ -145,7 +145,8 @@ export default function MainContent() {
     if (newRealPeople.length > 0) {
       setWatchedReal((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
-        return [...prev, ...newRealPeople.filter((p) => !existingIds.has(p.id))];
+        // Bump watcherCount by 1 for newly watched people
+        return [...prev, ...newRealPeople.filter((p) => !existingIds.has(p.id)).map((p) => ({ ...p, watcherCount: p.watcherCount + 1 }))];
       });
     }
     const newPeople = allKnownPeople.filter(
@@ -153,6 +154,7 @@ export default function MainContent() {
     );
     setFollowing((prev) => new Set(Array.from(prev).concat(ids)));
     setFollowSheet(null);
+    setQuery(""); // Clear search so user lands on following tab cleanly
     if (newPeople.length > 0) setConfirmation(newPeople);
   };
 
@@ -352,10 +354,19 @@ export default function MainContent() {
       {confirmation && (
         <ConfirmationScreen
           people={confirmation}
-          onDone={() => { setConfirmation(null); setTab("following"); }}
+          onDone={() => { setConfirmation(null); setTab("following"); setQuery(""); }}
           onAddMore={() => { setConfirmation(null); setQuery(""); }}
         />
       )}
+
+      {/* Footer */}
+      <div className="mt-12 pb-6 text-center" style={{ fontSize: 10, color: "#ccc" }}>
+        <a href="/terms" style={{ color: "#bbb", textDecoration: "underline" }}>Terms</a>
+        {" · "}
+        <a href="/privacy" style={{ color: "#bbb", textDecoration: "underline" }}>Privacy</a>
+        {" · "}
+        <span>© 2025 HollyV, LLC</span>
+      </div>
     </div>
   );
 }
