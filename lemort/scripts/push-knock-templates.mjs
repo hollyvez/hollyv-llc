@@ -85,7 +85,7 @@ const workflows = [
         ref: "email_1",
         type: "channel",
         channel_type: "email",
-        channel_key: "knock-email",
+        channel_id: "f5479c99-d119-43b3-8974-9efcf701ae6d",
         name: "Death Alert",
         template: {
           subject: "{{ data.subjectName }} has flatlined.",
@@ -121,7 +121,7 @@ const workflows = [
         ref: "email_1",
         type: "channel",
         channel_type: "email",
-        channel_key: "knock-email",
+        channel_id: "f5479c99-d119-43b3-8974-9efcf701ae6d",
         name: "Follow Confirmation",
         template: {
           subject: "You're watching {{ data.subjectName }}.",
