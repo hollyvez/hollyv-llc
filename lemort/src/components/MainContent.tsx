@@ -27,7 +27,7 @@ export default function MainContent() {
   const [searchResults, setSearchResults] = useState<MockPerson[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const [following, setFollowing] = useState<Set<string>>(INITIAL_FOLLOWING);
+  const [following, setFollowing] = useState<Set<string>>(new Set());
   // Wikidata people who've been followed — not in MOCK_PEOPLE
   const [watchedReal, setWatchedReal] = useState<MockPerson[]>([]);
   const [followSheet, setFollowSheet] = useState<MockPerson | null>(null);

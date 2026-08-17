@@ -5,6 +5,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Les Morts · Flatlined.",
   description: "Pay $1. We watch them. You get on with your life.",
+  icons: {
+    icon: "/cameo-man.svg",
+    shortcut: "/cameo-man.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
