@@ -28,7 +28,7 @@ export default function MainContent() {
   const [showAuth, setShowAuth] = useState(false);
   const [pendingPerson, setPendingPerson] = useState<MockPerson | null>(null);
 
-  const [tab, setTab] = useState<Tab>("following");
+  const [tab, setTab] = useState<Tab>("leaderboard");
   const [searchPath, setSearchPath] = useState<SearchPath>("famous");
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MockPerson[]>([]);
@@ -66,6 +66,7 @@ export default function MainContent() {
       }) => {
         if (data.personIds?.length) {
           setFollowing((prev) => new Set(Array.from(prev).concat(data.personIds)));
+          setTab("following"); // user has watches — land on following tab
         }
         if (data.persons?.length) {
           setWatchedReal((prev) => {
