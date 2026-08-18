@@ -107,9 +107,18 @@ export default function FollowSheet({ person, following, userEmail, onConfirm, o
           zIndex: 50,
         }}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
+        {/* Handle + X */}
+        <div className="flex items-center justify-between pt-3 pb-1 px-4">
+          <div className="w-6" />
           <div className="h-1 w-10 rounded-full bg-[#e8e4dc]" />
+          <button
+            onClick={onDismiss}
+            className="w-6 h-6 flex items-center justify-center rounded-full"
+            style={{ color: "#bbb", fontSize: 18, lineHeight: 1 }}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
 
         <div className="px-5 pb-8 pt-2">
@@ -260,13 +269,25 @@ export default function FollowSheet({ person, following, userEmail, onConfirm, o
           )}
 
           {!showPayment && (
-            <button
-              onClick={onDismiss}
-              className="w-full text-center mt-4"
-              style={{ fontSize: 11, color: "#bbb" }}
-            >
-              maybe later
-            </button>
+            <div className="mt-4 text-center">
+              {following.has(person.id) && person.group ? (
+                <button
+                  onClick={onDismiss}
+                  className="text-xs font-medium"
+                  style={{ color: "#5a5850" }}
+                >
+                  See other {person.group} →
+                </button>
+              ) : (
+                <button
+                  onClick={onDismiss}
+                  className="text-xs"
+                  style={{ color: "#bbb" }}
+                >
+                  maybe later
+                </button>
+              )}
+            </div>
           )}
 
           {showPayment && (

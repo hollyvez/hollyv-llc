@@ -195,7 +195,8 @@ export default function MainContent() {
     );
     setFollowing((prev) => new Set(Array.from(prev).concat(ids)));
     setFollowSheet(null);
-    setQuery(""); // Clear search so user lands on following tab cleanly
+    setQuery("");
+    setTab("following");
     if (newPeople.length > 0) setConfirmation(newPeople);
   };
 
