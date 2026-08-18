@@ -258,14 +258,12 @@ export default function MainContent() {
 
       {/* Search bar */}
       <div className="mb-4">
-        <div className="relative">
+        <div className={`relative${searchPath === "private" ? " hidden" : ""}`}>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={
-              searchPath === "famous" ? "Find someone alive…" : "Full name…"
-            }
+            placeholder="Find someone alive…"
             className="w-full rounded-2xl border border-[#e8e4dc] bg-white px-5 py-4 text-sm text-[#1a1a14] placeholder-[#ccc] outline-none focus:border-[#5a5850] transition-colors"
           />
           {isSearching && (
