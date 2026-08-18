@@ -49,7 +49,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-[#999] mb-3">What we do</h2>
             <ul className="space-y-2 list-none">
-              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Monitor public records and Wikipedia for deaths of people on your watchlist.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Monitor public records and Wikipedia for deaths of public figures on your watchlist.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Check public obituary records weekly for private individuals you&rsquo;ve added.</li>
               <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Send you a notification when a death is confirmed via a reliable public source.</li>
               <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Try very hard not to be weird about it.</li>
             </ul>
@@ -58,10 +59,24 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-[#999] mb-3">What we don&rsquo;t do</h2>
             <ul className="space-y-2 list-none">
-              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Guarantee timing. We check hourly. Breaking news moves faster than we do sometimes.</li>
-              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Monitor private individuals. Public figures only — people with a verifiable Wikipedia presence.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Guarantee timing. Public figures: checked hourly. Private individuals: checked weekly. Breaking news moves faster than we do sometimes.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Guarantee accuracy. We rely on public obituary sources. We&rsquo;ll do our best. We&rsquo;re not a legal record.</li>
               <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Sell your data. We have no interest in your email beyond sending you death notifications. That sentence sounds worse than it is.</li>
               <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Promise the service will run forever. We&rsquo;ll do our best. If we shut down, we&rsquo;ll let you know.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-[#999] mb-3">Private individuals</h2>
+            <p>
+              We offer monitoring of private individuals (people not on Wikipedia) using publicly available
+              obituary records. By using this feature, you confirm that:
+            </p>
+            <ul className="space-y-2 list-none mt-3">
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>You have a legitimate personal reason to be notified (e.g., family, old friend, creditor).</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>You will not use this service to locate, stalk, harass, or monitor anyone for unlawful purposes.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>You understand this is not a consumer report. Les Morts is not a consumer reporting agency under the FCRA, and this service may not be used for employment, credit, housing, or insurance decisions.</li>
+              <li className="flex gap-2"><span className="text-[#bbb] flex-shrink-0">—</span>Checks are weekly, coverage is US and UK only, and we may miss deaths not published in public obituaries. The $1 is non-refundable regardless of outcome.</li>
             </ul>
           </section>
 

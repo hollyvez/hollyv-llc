@@ -217,10 +217,12 @@ export default function MainContent() {
   };
 
   const handlePrivateConfirm = () => {
+    const name = privateFormData?.name.split(" ")[0] ?? "them";
     setPrivateFormData(null);
     setQuery("");
+    setSearchPath("famous");
     setTab("following");
-    // In real app: trigger Stripe + DB
+    showToast(`Watching ${name}. We check weekly. We'll tell you first.`);
   };
 
   const showingSearch = query.trim().length >= 3 && searchPath === "famous";
@@ -308,7 +310,8 @@ export default function MainContent() {
       {searchPath === "private" && privateFormData && (
         <PrivateConfirmScreen
           data={privateFormData}
-          onConfirm={handlePrivateConfirm}
+          userEmail={user?.email ?? undefined}
+          onSuccess={handlePrivateConfirm}
           onBack={() => setPrivateFormData(null)}
         />
       )}

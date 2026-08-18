@@ -22,7 +22,9 @@ model User {
 model Person {
   id           String    @id @default(cuid())
   name         String
-  wikidataId   String    @unique
+  wikidataId   String?   @unique   // null for private persons
+  birthYear    Int?                // private persons: birth year (e.g. 1952)
+  city         String?             // private persons: city for obituary search
   dob          DateTime?
   photo        String?
   isPrivate    Boolean   @default(false)
@@ -35,6 +37,7 @@ model Person {
 
   @@index([wikidataId])
   @@index([isDeceased])
+  @@index([isPrivate])
 }
 
 model Watch {

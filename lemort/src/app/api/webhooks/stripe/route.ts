@@ -25,13 +25,68 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "payment_intent.succeeded") {
     const intent = event.data.object as Stripe.PaymentIntent;
-    const { personIds, email, channel, phone } = intent.metadata;
-    const ids = personIds?.split(",").filter(Boolean) ?? [];
+    const { type, personId, personIds, email, channel, phone } = intent.metadata;
 
+    if (!email) {
+      console.warn("[webhook] missing email in metadata — skipping");
+      return NextResponse.json({ received: true });
+    }
+
+    // --- Private person flow ---
+    if (type === "private" && personId) {
+      console.log(`[webhook] private person payment: personId=${personId}, email=${email}`);
+      try {
+        const user = await prisma.user.upsert({
+          where: { email },
+          create: { email, phone: phone || null },
+          update: { phone: phone || null },
+        });
+
+        const person = await prisma.person.findUnique({ where: { id: personId } });
+        if (!person) {
+          console.warn(`[webhook] private person not found: ${personId}`);
+        } else {
+          await prisma.watch.upsert({
+            where: { userId_personId: { userId: user.id, personId: person.id } },
+            create: { userId: user.id, personId: person.id, stripeChargeId: intent.id },
+            update: {},
+          });
+          await prisma.person.update({
+            where: { id: person.id },
+            data: { watcherCount: { increment: 1 } },
+          }).catch(() => {});
+
+          // Knock confirmation for private person
+          if (process.env.KNOCK_SECRET_KEY) {
+            const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
+            await knock.workflows.trigger("follow-confirmation", {
+              recipients: [{ id: email, email }],
+              data: {
+                subjectName: person.name,
+                age: person.birthYear
+                  ? new Date().getFullYear() - person.birthYear
+                  : null,
+                quip: "not on Wikipedia",
+                watcherCount: person.watcherCount + 1,
+                photoUrl: "",
+                unsubscribeUrl: `https://lesmorts.org/unsubscribe?email=${encodeURIComponent(email)}`,
+              },
+            }).catch((err: unknown) => console.error("[webhook] Knock private:", err));
+          }
+          console.log(`[webhook] private watch created for ${email} → ${person.name}`);
+        }
+      } catch (err) {
+        console.error("[webhook] private person DB error:", err);
+      }
+      return NextResponse.json({ received: true });
+    }
+
+    // --- Public person flow ---
+    const ids = personIds?.split(",").filter(Boolean) ?? [];
     console.log(`[webhook] payment succeeded: ${ids.length} people, email=${email}, channel=${channel}`);
 
-    if (!email || ids.length === 0) {
-      console.warn("[webhook] missing email or personIds in metadata — skipping DB + Knock");
+    if (ids.length === 0) {
+      console.warn("[webhook] missing personIds in metadata — skipping");
       return NextResponse.json({ received: true });
     }
 
@@ -43,9 +98,8 @@ export async function POST(req: NextRequest) {
         update: { phone: phone || null },
       });
 
-      // For each person, find or create the Person record, then create Watch
+      // For each person, find by wikidataId, then create Watch
       for (const wikidataId of ids) {
-        // Find person by wikidataId
         const person = await prisma.person.findUnique({
           where: { wikidataId },
         });
@@ -55,7 +109,6 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        // Create watch (skip if already exists)
         await prisma.watch.upsert({
           where: { userId_personId: { userId: user.id, personId: person.id } },
           create: {
@@ -63,20 +116,18 @@ export async function POST(req: NextRequest) {
             personId: person.id,
             stripeChargeId: intent.id,
           },
-          update: {}, // already watching — no-op
+          update: {},
         });
 
-        // Increment watcher count
         await prisma.person.update({
           where: { id: person.id },
           data: { watcherCount: { increment: 1 } },
-        }).catch(() => {}); // non-critical
+        }).catch(() => {});
       }
 
       console.log(`[webhook] created ${ids.length} watch record(s) for ${email}`);
     } catch (err) {
       console.error("[webhook] DB error:", err);
-      // Don't return error — Stripe will retry. Log and continue to Knock.
     }
 
     // Send follow confirmation via Knock
@@ -84,7 +135,6 @@ export async function POST(req: NextRequest) {
       try {
         const knock = new Knock({ apiKey: process.env.KNOCK_SECRET_KEY });
 
-        // Look up person details for the first person (confirmation email shows one)
         const firstPerson = await prisma.person.findUnique({
           where: { wikidataId: ids[0] },
         }).catch(() => null);
