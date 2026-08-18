@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MOCK_PEOPLE, INITIAL_FOLLOWING, type MockPerson } from "@/lib/mock-data";
 import PersonCard from "./PersonCard";
 import AvatarStrip from "./AvatarStrip";
 import LeaderboardTab from "./LeaderboardTab";
 import FollowSheet from "./FollowSheet";
-import ConfirmationScreen from "./ConfirmationScreen";
 import PrivatePersonForm, { type PrivateFormData } from "./PrivatePersonForm";
 import PrivateConfirmScreen from "./PrivateConfirmScreen";
 import AuthModal from "./AuthModal";
@@ -39,9 +38,16 @@ export default function MainContent() {
   // Wikidata people who've been followed — not in MOCK_PEOPLE
   const [watchedReal, setWatchedReal] = useState<MockPerson[]>([]);
   const [followSheet, setFollowSheet] = useState<MockPerson | null>(null);
-  const [confirmation, setConfirmation] = useState<MockPerson[] | null>(null);
 
   const [privateFormData, setPrivateFormData] = useState<PrivateFormData | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -197,7 +203,13 @@ export default function MainContent() {
     setFollowSheet(null);
     setQuery("");
     setTab("following");
-    if (newPeople.length > 0) setConfirmation(newPeople);
+    if (newPeople.length > 0) {
+      const firstName = newPeople[0].name.split(" ")[0];
+      const msg = newPeople.length === 1
+        ? `Watching ${firstName}. We'll let you know first.`
+        : `Watching ${newPeople.length} people. We've got eyes on them.`;
+      showToast(msg);
+    }
   };
 
   const handlePrivateSubmit = (data: PrivateFormData) => {
@@ -392,13 +404,19 @@ export default function MainContent() {
         />
       )}
 
-      {/* Confirmation screen */}
-      {confirmation && (
-        <ConfirmationScreen
-          people={confirmation}
-          onDone={() => { setConfirmation(null); setTab("following"); setQuery(""); }}
-          onAddMore={() => { setConfirmation(null); setQuery(""); }}
-        />
+      {/* Toast */}
+      {toast && (
+        <div
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-sm font-medium shadow-lg"
+          style={{
+            background: "#1a1a14",
+            color: "#f0ede6",
+            whiteSpace: "nowrap",
+            animation: "lemort-toast-in 0.3s ease",
+          }}
+        >
+          {toast}
+        </div>
       )}
 
       {/* Footer */}
