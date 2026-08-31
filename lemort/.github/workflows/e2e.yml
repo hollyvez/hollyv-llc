@@ -19,10 +19,8 @@ jobs:
     timeout-minutes: 15
 
     env:
-      # Use the manually-supplied URL if provided; otherwise spin up locally
-      BASE_URL: ${{ github.event.inputs.base_url }}
-      # Minimal env vars needed to start the Next.js dev server
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      # Use the manually-supplied URL if provided; otherwise test against production
+      BASE_URL: ${{ github.event.inputs.base_url || 'https://lesmorts.org' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -40,10 +38,6 @@ jobs:
       - name: Install Playwright browsers
         working-directory: lemort
         run: npx playwright install --with-deps chromium
-
-      - name: Generate Prisma client
-        working-directory: lemort
-        run: npx prisma generate
 
       - name: Run E2E tests
         working-directory: lemort
