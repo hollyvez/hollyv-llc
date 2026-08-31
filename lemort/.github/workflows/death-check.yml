@@ -18,20 +18,17 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: lemort/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: lemort
         run: npm ci
 
       - name: Generate Prisma client
-        working-directory: lemort
         run: npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run private death check
-        working-directory: lemort
         run: node scripts/check-private-deaths.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
